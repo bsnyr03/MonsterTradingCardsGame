@@ -1,0 +1,86 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+
+title Monster Trading Cards Game Class Diagram
+
+' Define main classes
+class User {
+  - String username
+  - String password
+  - int coins = 20
+  - Stack stack
+  - Deck deck
+  - int ELO = 100
+  + register()
+  + login()
+  + acquireCards()
+  + defineDeck()
+  + battle(User opponent)
+  + tradeCard(Card offeredCard, Card requiredCard)
+}
+
+class Card {
+  - String name
+  - int damage
+  + getDamage()
+}
+
+class SpellCard extends Card {
+  - ElementType element
+}
+
+class MonsterCard extends Card {
+  - ElementType element
+  + applySpecialty(MonsterCard opponent)
+}
+
+enum ElementType {
+  Fire
+  Water
+  Normal
+}
+
+class Package {
+  - List<Card> cards = 5
+  + acquire()
+}
+
+class Stack {
+  - List<Card> cards
+  + addCard(Card card)
+  + removeCard(Card card)
+}
+
+class Deck {
+  - List<Card> cards = 4
+  + selectBestCards()
+  + getCardForBattle()
+}
+
+class Battle {
+  - User player1
+  - User player2
+  + startBattle()
+}
+
+class Scoreboard {
+  - List<User> players
+  + displayScores()
+  + updateELO(User winner, User loser)
+}
+
+' Define relationships
+User "1" *-- "1" Stack : has
+User "1" *-- "1" Deck : has
+User "1" *-- "1" Scoreboard : ranks on
+User "1" *-- "many" Package : acquires
+User "1" *-- "1" Battle : participates in
+
+Package "1" *-- "5" Card : contains
+Stack "1" *-- "many" Card : contains
+Deck "1" *-- "4" Card : contains
+Battle "1" *-- "2" User : between
+Scoreboard "1" *-- "many" User : ranks
+
+@enduml
