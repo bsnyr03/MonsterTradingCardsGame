@@ -1,22 +1,19 @@
 -- Als Postgres User:
-create user weatherdb PASSWORD 'weatherdb';
-create database weatherdb with owner weatherdb;
+create user mtcg PASSWORD 'mtcg';
+create database mtcg with owner baris;
 
 
--- Als WeatherDB user:
-create table weather
-(
-    id          serial,
-    region      VARCHAR(200) not null,
-    city        varchar(200) not null,
-    temperature float        not null
+-- Als MTCG db user:
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    token VARCHAR(255) UNIQUE
 );
 
-
-INSERT INTO public.weather (id, region, city, temperature) VALUES (DEFAULT, 'Europe', 'Vienna', 28);
-INSERT INTO public.weather (id, region, city, temperature) VALUES (DEFAULT, 'Europe', 'Berlin', 26);
-INSERT INTO public.weather (id, region, city, temperature) VALUES (DEFAULT, 'Asia', 'Tokyo', 18);
-INSERT INTO public.weather (id, region, city, temperature) VALUES (DEFAULT, 'Europe', 'Rome', 35)
+INSERT INTO users (username, password) VALUES ('testuser', 'testpassword');
+INSERT INTO users (username, password) VALUES ('testuser2', '1234');
+INSERT INTO users (username, password) VALUES ('testuser3', 'abcd');
 
 
 
