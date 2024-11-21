@@ -31,7 +31,4 @@ public class UserService {
         userRepository.updateTocken(user.getId(), token);
         return token;
     }
-
-
-
 }

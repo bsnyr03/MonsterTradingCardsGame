@@ -1,6 +1,7 @@
 package at.fhtw.MTCG.controller;
 
 import at.fhtw.MTCG.model.User;
+import at.fhtw.MTCG.persistence.repository.UserRepository;
 import at.fhtw.httpserver.http.ContentType;
 import at.fhtw.httpserver.http.HttpStatus;
 import at.fhtw.httpserver.http.Method;
@@ -13,6 +14,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.sql.SQLException;
+import java.util.Collection;
 
 
 public class UserController implements RestController{
@@ -27,7 +29,9 @@ public class UserController implements RestController{
     public Response handleRequest(Request request) {
         try {
             if (request.getMethod() == Method.POST) {
-                return handleUserRequest(request);
+                return handleUserRequestPOST(request);
+            }else if (request.getMethod() == Method.GET) {
+                return handleUserRequestGET(request);
             }
 
             return new Response(
@@ -45,7 +49,7 @@ public class UserController implements RestController{
         }
     }
 
-    private Response handleUserRequest(Request request) {
+    private Response handleUserRequestPOST(Request request) {
         try {
             User user = new ObjectMapper().readValue(request.getBody(), User.class);
 
@@ -83,4 +87,29 @@ public class UserController implements RestController{
             throw new RuntimeException(e);
         }
     }
+        private Response handleUserRequestGET(Request request){
+            try {
+                //Collection<User> users = ;
+
+                String json = new ObjectMapper().writeValueAsString(users);
+
+                return new Response(
+                        HttpStatus.OK,
+                        ContentType.JSON,
+                        json
+                );
+            } catch (SQLException e) {
+                return new Response(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        ContentType.JSON,
+                        "{\"error\": \"" + e.getMessage() + "\"}"
+                );
+            } catch (JsonProcessingException e) {
+                return new Response(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        ContentType.JSON,
+                        "{\"error\": \"Error serializing data to JSON\"}"
+                );
+            }
+        }
 }
