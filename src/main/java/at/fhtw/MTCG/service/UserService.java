@@ -1,15 +1,17 @@
 package at.fhtw.MTCG.service;
 import at.fhtw.MTCG.model.User;
+import at.fhtw.MTCG.persistence.UnitOfWork;
 import at.fhtw.MTCG.persistence.repository.UserRepository;
+import at.fhtw.MTCG.persistence.repository.UserRepositoryImpl;
 
 import java.sql.SQLException;
 import java.util.UUID;
 
 public class UserService {
-    private final UserRepository userRepository;
+    private UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public UserService() {
+        userRepository = new UserRepositoryImpl(new UnitOfWork());
     }
 
     public boolean registerUser(User user) throws SQLException {

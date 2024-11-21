@@ -17,27 +17,23 @@ import java.sql.SQLException;
 
 public class UserController implements RestController{
     private final UserService userService;
-    public UserController(UserService userService) {
-        this.userService = userService;
+
+
+    public UserController() {
+        this.userService = new UserService();
     }
 
     @Override
     public Response handleRequest(Request request) {
         try {
-            // Login-Endpunkt: POST /users/login
-            if (request.getMethod() == Method.POST && request.getPathParts().size() > 1 && "login".equals(request.getPathParts().get(1))) {
-                return handleLogin(request);
-            }
-            // Registrierung-Endpunkt: POST /users
-            else if (request.getMethod() == Method.POST) {
-                return handleRegister(request);
+            if (request.getMethod() == Method.POST) {
+                return handleUserRequest(request);
             }
 
-            // Ungültige Anfrage
             return new Response(
                     HttpStatus.BAD_REQUEST,
                     ContentType.JSON,
-                    "{\"error\": \"Invalid request\"}"
+                    "{\"error\": \"Invalid request method\"}"
             );
 
         } catch (Exception e) {
@@ -49,44 +45,20 @@ public class UserController implements RestController{
         }
     }
 
-    private Response handleRegister(Request request) {
+    private Response handleUserRequest(Request request) {
         try {
             User user = new ObjectMapper().readValue(request.getBody(), User.class);
 
-            userService.registerUser(user);
-
-            return new Response(
-                    HttpStatus.CREATED,
-                    ContentType.JSON,
-                    "{\"message\": \"User registered successfully\"}"
-            );
-
-        } catch (IllegalStateException e) {
-            return new Response(
-                    HttpStatus.CONFLICT,
-                    ContentType.JSON,
-                    "{\"error\": \"" + e.getMessage() + "\"}"
-            );
-
-        } catch (SQLException | RuntimeException e) {
-            return new Response(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    ContentType.JSON,
-                    "{\"error\": \"" + e.getMessage() + "\"}"
-            );
-        } catch (JsonMappingException e) {
-            throw new RuntimeException(e);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private Response handleLogin(Request request) {
-        try {
-            User user = new ObjectMapper().readValue(request.getBody(), User.class);
+            if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+                userService.registerUser(user);
+                return new Response(
+                        HttpStatus.CREATED,
+                        ContentType.JSON,
+                        "{\"message\": \"User registered successfully\"}"
+                );
+            }
 
             String token = userService.loginUser(user.getName(), user.getPassword());
-
             return new Response(
                     HttpStatus.OK,
                     ContentType.JSON,
@@ -99,8 +71,7 @@ public class UserController implements RestController{
                     ContentType.JSON,
                     "{\"error\": \"" + e.getMessage() + "\"}"
             );
-
-        } catch (SQLException | RuntimeException e) {
+        } catch (SQLException e) {
             return new Response(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     ContentType.JSON,
