@@ -6,6 +6,7 @@ import at.fhtw.MTCG.model.User;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class UserRepositoryImpl implements UserRepository {
@@ -34,9 +35,28 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Collection<User> findAllUsers() {
-        return null;
+    public Collection<User> findAllUsers() throws IllegalAccessException {
+        try (PreparedStatement preparedStatement =
+                     this.unitOfWork.prepareStatement("""
+                    SELECT * FROM users
+                """)) {
+            ResultSet resultSet = preparedStatement.executeQuery();
+            Collection<User> userRows = new ArrayList<>();
+
+            while (resultSet.next()) {
+                User user = new User(
+                        resultSet.getString("username"),
+                        resultSet.getString("password")
+                );
+                userRows.add(user);
+            }
+
+            return userRows;
+        } catch (SQLException e) {
+            throw new IllegalAccessException("Select nicht erfolgreich");
+        }
     }
+
 
     @Override
     public boolean saveUser(User user) throws SQLException{
