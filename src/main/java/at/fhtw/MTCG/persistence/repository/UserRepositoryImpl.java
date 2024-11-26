@@ -44,13 +44,13 @@ public class UserRepositoryImpl implements UserRepository {
             Collection<User> userRows = new ArrayList<>();
 
             while (resultSet.next()) {
-                User user = new User(
-                        resultSet.getString("username"),
-                        resultSet.getString("password")
-                );
+                User user = new User();
+                user.setId(resultSet.getInt("id"));
+                user.setUsername(resultSet.getString("username"));
+                user.setPassword(resultSet.getString("password"));
+                user.setToken(resultSet.getString("token"));
                 userRows.add(user);
             }
-
             return userRows;
         } catch (SQLException e) {
             throw new IllegalAccessException("Select nicht erfolgreich");
