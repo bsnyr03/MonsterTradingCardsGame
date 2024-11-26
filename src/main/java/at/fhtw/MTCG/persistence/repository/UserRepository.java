@@ -9,5 +9,5 @@ public interface UserRepository {
     Collection<User> findAllUsers() throws IllegalAccessException;
     boolean saveUser(User user) throws SQLException;
     void deleteUser(User user);
-    void updateTocken(int userId, String token) throws SQLException;
+    void updateTocken(String username, String token) throws SQLException;
 }

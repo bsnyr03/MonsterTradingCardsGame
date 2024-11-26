@@ -5,15 +5,16 @@ import lombok.Setter;
 
 public class User {
     private int id;
-    private String name;
+    private String username;
     private String password;
     private String token;
 
     public User(){}
 
-    public User(String name, String password){
-        this.name = name;
+    public User(String username, String password){
+        this.username = username;
         this.password = password;
+        this.token = null;
     }
 
     public int getId() {
@@ -24,12 +25,12 @@ public class User {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getUsername() {
+        return username;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getPassword() {

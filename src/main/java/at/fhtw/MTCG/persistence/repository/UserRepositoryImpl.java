@@ -24,8 +24,7 @@ public class UserRepositoryImpl implements UserRepository {
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 User user = new User();
-                user.setId(resultSet.getInt("id"));
-                user.setName(resultSet.getString("name"));
+                user.setUsername(resultSet.getString("name"));
                 user.setPassword(resultSet.getString("password"));
                 user.setToken(resultSet.getString("token"));
                 return user;
@@ -62,7 +61,7 @@ public class UserRepositoryImpl implements UserRepository {
     public boolean saveUser(User user) throws SQLException{
         String sql = "INSERT INTO users (username, password) VALUES (?, ?)";
         try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
-            statement.setString(1, user.getName());
+            statement.setString(1, user.getUsername());
             statement.setString(2, user.getPassword());
             return statement.executeUpdate() > 0;
         }
@@ -74,11 +73,11 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public void updateTocken(int userId, String token) throws SQLException{
-        String sql = "UPDATE users SET token = ? WHERE id = ?";
+    public void updateTocken(String username, String token) throws SQLException{
+        String sql = "UPDATE users SET token = ? WHERE username = ?";
         try (PreparedStatement statement = this.unitOfWork.prepareStatement(sql)) {
             statement.setString(1, token);
-            statement.setInt(2, userId);
+            statement.setString(2, username);
             statement.executeUpdate();
         }
     }

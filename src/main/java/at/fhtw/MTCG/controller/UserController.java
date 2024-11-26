@@ -62,7 +62,7 @@ public class UserController implements RestController{
                 );
             }
 
-            String token = userService.loginUser(user.getName(), user.getPassword());
+            String token = userService.loginUser(user.getUsername(), user.getPassword());
             return new Response(
                     HttpStatus.OK,
                     ContentType.JSON,
@@ -89,7 +89,7 @@ public class UserController implements RestController{
     }
         private Response handleUserRequestGET(Request request){
             try {
-                //Collection<User> users = ;
+                Collection<User> users = userService.findAllUsers();
 
                 String json = new ObjectMapper().writeValueAsString(users);
 
@@ -110,6 +110,8 @@ public class UserController implements RestController{
                         ContentType.JSON,
                         "{\"error\": \"Error serializing data to JSON\"}"
                 );
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
             }
         }
 }

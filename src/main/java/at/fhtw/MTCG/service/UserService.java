@@ -5,6 +5,7 @@ import at.fhtw.MTCG.persistence.repository.UserRepository;
 import at.fhtw.MTCG.persistence.repository.UserRepositoryImpl;
 
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.UUID;
 
 public class UserService {
@@ -15,7 +16,7 @@ public class UserService {
     }
 
     public boolean registerUser(User user) throws SQLException {
-        if(userRepository.findByName(user.getName())!= null){
+        if(userRepository.findByName(user.getUsername())!= null){
             throw new IllegalStateException("User already exists");
         }
         return userRepository.saveUser(user);
@@ -28,7 +29,12 @@ public class UserService {
 
         }
         String token = "mtcgToken-" + UUID.randomUUID().toString();
-        userRepository.updateTocken(user.getId(), token);
+        userRepository.updateTocken(username, token);
         return token;
     }
+
+    public Collection<User> findAllUsers() throws SQLException, IllegalAccessException {
+        return userRepository.findAllUsers();
+    }
+
 }
