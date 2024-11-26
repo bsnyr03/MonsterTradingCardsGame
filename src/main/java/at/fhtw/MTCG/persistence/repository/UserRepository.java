@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 public interface UserRepository {
-    User findByName(String name) throws SQLException;
+    User findByName(String username) throws SQLException;
     Collection<User> findAllUsers() throws IllegalAccessException;
     boolean saveUser(User user) throws SQLException;
     void deleteUser(User user);

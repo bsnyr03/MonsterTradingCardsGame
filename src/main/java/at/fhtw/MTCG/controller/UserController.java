@@ -17,7 +17,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 
-public class UserController implements RestController{
+public class UserController implements RestController {
     private final UserService userService;
 
 
@@ -30,22 +30,14 @@ public class UserController implements RestController{
         try {
             if (request.getMethod() == Method.POST) {
                 return handleUserRequestPOST(request);
-            }else if (request.getMethod() == Method.GET) {
+            } else if (request.getMethod() == Method.GET) {
                 return handleUserRequestGET(request);
             }
 
-            return new Response(
-                    HttpStatus.BAD_REQUEST,
-                    ContentType.JSON,
-                    "{\"error\": \"Invalid request method\"}"
-            );
+            return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"Invalid request method\"}");
 
         } catch (Exception e) {
-            return new Response(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    ContentType.JSON,
-                    "{\"error\": \"" + e.getMessage() + "\"}"
-            );
+            return new Response(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.JSON, "{\"error\": \"" + e.getMessage() + "\"}");
         }
     }
 
@@ -55,63 +47,41 @@ public class UserController implements RestController{
 
             if (user.getPassword() != null && !user.getPassword().isEmpty()) {
                 userService.registerUser(user);
-                return new Response(
-                        HttpStatus.CREATED,
-                        ContentType.JSON,
-                        "{\"message\": \"User registered successfully\"}"
-                );
-            }
 
-            String token = userService.loginUser(user.getUsername(), user.getPassword());
-            return new Response(
-                    HttpStatus.OK,
-                    ContentType.JSON,
-                    "{\"token\": \"" + token + "\"}"
-            );
+                String token = userService.loginUser(user.getUsername(), user.getPassword());
+                user.setToken(token);
+
+                String jsonResponse = new ObjectMapper().writeValueAsString(user);
+
+
+                return new Response(HttpStatus.CREATED, ContentType.JSON, jsonResponse);
+            }
+            return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"Password cannot be empty\"}");
 
         } catch (IllegalArgumentException e) {
-            return new Response(
-                    HttpStatus.UNAUTHORIZED,
-                    ContentType.JSON,
-                    "{\"error\": \"" + e.getMessage() + "\"}"
-            );
+            return new Response(HttpStatus.UNAUTHORIZED, ContentType.JSON, "{\"error\": \"" + e.getMessage() + "\"}");
         } catch (SQLException e) {
-            return new Response(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    ContentType.JSON,
-                    "{\"error\": \"" + e.getMessage() + "\"}"
-            );
+            return new Response(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.JSON, "{\"error\": \"" + e.getMessage() + "\"}");
         } catch (JsonMappingException e) {
             throw new RuntimeException(e);
         } catch (JsonProcessingException e) {
+            return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"" + e.getMessage() + "\"}");
+        }
+    }
+
+    private Response handleUserRequestGET(Request request) {
+        try {
+            Collection<User> users = userService.findAllUsers();
+
+            String json = new ObjectMapper().writeValueAsString(users);
+
+            return new Response(HttpStatus.OK, ContentType.JSON, json);
+        } catch (SQLException e) {
+            return new Response(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.JSON, "{\"error\": \"" + e.getMessage() + "\"}");
+        } catch (JsonProcessingException e) {
+            return new Response(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.JSON, "{\"error\": \"Error serializing data to JSON\"}");
+        } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }
-        private Response handleUserRequestGET(Request request){
-            try {
-                Collection<User> users = userService.findAllUsers();
-
-                String json = new ObjectMapper().writeValueAsString(users);
-
-                return new Response(
-                        HttpStatus.OK,
-                        ContentType.JSON,
-                        json
-                );
-            } catch (SQLException e) {
-                return new Response(
-                        HttpStatus.INTERNAL_SERVER_ERROR,
-                        ContentType.JSON,
-                        "{\"error\": \"" + e.getMessage() + "\"}"
-                );
-            } catch (JsonProcessingException e) {
-                return new Response(
-                        HttpStatus.INTERNAL_SERVER_ERROR,
-                        ContentType.JSON,
-                        "{\"error\": \"Error serializing data to JSON\"}"
-                );
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }
 }

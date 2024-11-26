@@ -17,14 +17,15 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public User findByName(String name) throws SQLException{
+    public User findByName(String username) throws SQLException{
         String sql = "SELECT * FROM users WHERE username = ?";
         try (PreparedStatement statement = this.unitOfWork.prepareStatement(sql)) {
-            statement.setString(1, name);
+            statement.setString(1, username);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 User user = new User();
-                user.setUsername(resultSet.getString("name"));
+                user.setId(resultSet.getInt("id"));
+                user.setUsername(resultSet.getString("username"));
                 user.setPassword(resultSet.getString("password"));
                 user.setToken(resultSet.getString("token"));
                 return user;
@@ -59,10 +60,11 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public boolean saveUser(User user) throws SQLException{
-        String sql = "INSERT INTO users (username, password) VALUES (?, ?)";
+        String sql = "INSERT INTO users (username, password, token) VALUES (?, ?, ?)";
         try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
             statement.setString(1, user.getUsername());
             statement.setString(2, user.getPassword());
+            statement.setString(3, user.getToken());
             return statement.executeUpdate() > 0;
         }
     }
