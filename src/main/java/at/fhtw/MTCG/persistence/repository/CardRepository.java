@@ -9,5 +9,5 @@ public interface CardRepository {
     Card findById(int id) throws SQLException;
     Collection<Card> findAll() throws SQLException;
     boolean save(Card card) throws SQLException;
-    boolean delete(Card card) throws SQLException;
+    boolean delete(int card) throws SQLException;
 }

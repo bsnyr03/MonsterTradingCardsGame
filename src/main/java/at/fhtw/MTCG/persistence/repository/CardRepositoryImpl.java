@@ -10,7 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public class CardRepositoryImpl implements CardRepository {
     private final UnitOfWork unitOfWork;
@@ -74,7 +73,7 @@ public class CardRepositoryImpl implements CardRepository {
     }
 
     @Override
-    public boolean delete(Card card) throws SQLException {
+    public boolean delete(int card) throws SQLException {
         String sql = "DELETE FROM cards WHERE id = ?";
         try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
             //statement.setInt(1, id);
