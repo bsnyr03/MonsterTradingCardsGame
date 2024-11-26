@@ -12,6 +12,8 @@ public class Card {
     private ElementType element;
     private CardType type;
 
+    public Card(){}
+
     public Card(int id, String name, double damage, at.fhtw.MTCG.model.enums.ElementType element, CardType type){
         this.id = id;
         this.name = name;

@@ -67,7 +67,6 @@ public class CardRepositoryImpl implements CardRepository {
             statement.setDouble(3, card.getDamage());
             statement.setString(4, card.getElement().name());
             statement.setString(5, card.getType().name());
-
             return statement.executeUpdate() > 0;
         }
     }
