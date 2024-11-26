@@ -37,4 +37,9 @@ public class UserService {
         return userRepository.findAllUsers();
     }
 
+    public User findUserByUsername(String username) throws SQLException {
+        return userRepository.findByName(username);
+    }
+
+
 }

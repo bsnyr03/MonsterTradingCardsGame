@@ -45,21 +45,64 @@ public class UserController implements RestController {
         try {
             User user = new ObjectMapper().readValue(request.getBody(), User.class);
 
-            if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-                userService.registerUser(user);
-
-                String token = userService.loginUser(user.getUsername(), user.getPassword());
-                user.setToken(token);
-
-                String jsonResponse = new ObjectMapper().writeValueAsString(user);
-
-
-                return new Response(HttpStatus.CREATED, ContentType.JSON, jsonResponse);
+            if (user.getUsername() == null || user.getUsername().isEmpty()) {
+                return new Response(
+                        HttpStatus.BAD_REQUEST,
+                        ContentType.JSON,
+                        "{\"error\": \"Username cannot be empty\"}"
+                );
             }
-            return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"Password cannot be empty\"}");
+
+            if (user.getPassword() == null || user.getPassword().isEmpty()) {
+                return new Response(
+                        HttpStatus.BAD_REQUEST,
+                        ContentType.JSON,
+                        "{\"error\": \"Password cannot be empty\"}"
+                );
+            }
+
+            try {
+                // Überprüfen, ob der Benutzer bereits existiert
+                User existingUser = userService.findUserByUsername(user.getUsername());
+
+                // Wenn der Benutzer existiert, einloggen
+                if (existingUser != null) {
+                    String token = userService.loginUser(user.getUsername(), user.getPassword());
+                    existingUser.setToken(token);
+
+                    // Log für Terminal
+                    System.out.println("User logged in: " + existingUser.getUsername() + " (Token: " + existingUser.getToken() + ")");
+
+
+                    // Antwort mit Token zurückgeben
+                    String jsonResponse = new ObjectMapper().writeValueAsString(existingUser);
+                    return new Response(
+                            HttpStatus.OK,
+                            ContentType.JSON,
+                            jsonResponse
+                    );
+                }
+
+            } catch (IllegalArgumentException e) {
+                return new Response(
+                        HttpStatus.UNAUTHORIZED,
+                        ContentType.JSON,
+                        "{\"success\": \"Invalid username or password\"}"
+                );
+            }
+
+            // Benutzer registrieren
+            userService.registerUser(user);
+
+            // Log für Terminal
+            System.out.println("User registered successfully: " + user.getUsername());
+
+
+            // Erfolgsantwort
+            return new Response(HttpStatus.CREATED, ContentType.JSON, "{\"error\": \"User registered successfully.\"}");
 
         } catch (IllegalArgumentException e) {
-            return new Response(HttpStatus.UNAUTHORIZED, ContentType.JSON, "{\"error\": \"" + e.getMessage() + "\"}");
+            return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"" + e.getMessage() + "\"}");
         } catch (SQLException e) {
             return new Response(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.JSON, "{\"error\": \"" + e.getMessage() + "\"}");
         } catch (JsonMappingException e) {
