@@ -31,5 +31,7 @@ CREATE TABLE cards
     type    VARCHAR(50)      NOT NULL
 );
 
+INSERT INTO cards (name, damage, element, type) VALUES ('FireGoblin', '50', 'FIRE', 'MONSTER');
+INSERT INTO cards (name, damage, element, type) VALUES ('WaterSpell', '40', 'WATER', 'SPELL');
 
 
