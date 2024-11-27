@@ -1,8 +1,8 @@
 package at.fhtw.MTCG.persistence.repository;
 
 import at.fhtw.MTCG.model.Card;
-import at.fhtw.MTCG.model.enums.CardType;
-import at.fhtw.MTCG.model.enums.ElementType;
+import at.fhtw.MTCG.model.enums.CardTypeEnum;
+import at.fhtw.MTCG.model.enums.ElementTypeEnum;
 import at.fhtw.MTCG.persistence.UnitOfWork;
 
 import java.sql.PreparedStatement;
@@ -30,8 +30,8 @@ public class CardRepositoryImpl implements CardRepository {
                         resultSet.getInt("id"),
                         resultSet.getString("name"),
                         resultSet.getDouble("damage"),
-                        ElementType.valueOf(resultSet.getString("element")),
-                        CardType.valueOf(resultSet.getString("type"))
+                        ElementTypeEnum.valueOf(resultSet.getString("element")),
+                        CardTypeEnum.valueOf(resultSet.getString("type"))
                 );
             }
         }
@@ -50,8 +50,8 @@ public class CardRepositoryImpl implements CardRepository {
                         resultSet.getInt("id"),
                         resultSet.getString("name"),
                         resultSet.getDouble("damage"),
-                        ElementType.valueOf(resultSet.getString("element")),
-                        CardType.valueOf(resultSet.getString("type"))
+                        ElementTypeEnum.valueOf(resultSet.getString("element")),
+                        CardTypeEnum.valueOf(resultSet.getString("type"))
                 ));
             }
             return cards;

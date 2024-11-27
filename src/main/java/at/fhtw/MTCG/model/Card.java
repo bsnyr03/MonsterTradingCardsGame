@@ -1,6 +1,7 @@
 package at.fhtw.MTCG.model;
 
-import at.fhtw.MTCG.model.enums.CardType;
+import at.fhtw.MTCG.model.enums.CardTypeEnum;
+import at.fhtw.MTCG.model.enums.ElementTypeEnum;
 
 import java.lang.annotation.ElementType;
 
@@ -9,12 +10,12 @@ public class Card {
     private int id;
     private String name;
     private double damage;
-    private ElementType element;
-    private CardType type;
+    private ElementTypeEnum element;
+    private CardTypeEnum type;
 
     public Card(){}
 
-    public Card(int id, String name, double damage, at.fhtw.MTCG.model.enums.ElementType element, CardType type){
+    public Card(int id, String name, double damage, ElementTypeEnum element, CardTypeEnum type){
         this.id = id;
         this.name = name;
         this.damage = damage;
@@ -45,19 +46,19 @@ public class Card {
         this.damage = damage;
     }
 
-    public ElementType getElement() {
+    public ElementTypeEnum getElement() {
         return element;
     }
 
-    public void setElement(ElementType element) {
+    public void setElement(ElementTypeEnum element) {
         this.element = element;
     }
 
-    public CardType getType() {
+    public CardTypeEnum getType() {
         return type;
     }
 
-    public void setType(CardType type) {
+    public void setType(CardTypeEnum type) {
         this.type = type;
     }
 
