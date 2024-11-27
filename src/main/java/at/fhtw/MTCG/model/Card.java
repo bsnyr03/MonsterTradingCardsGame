@@ -19,6 +19,7 @@ public class Card {
         this.id = id;
         this.name = name;
         this.damage = damage;
+        this.element = element;
         this.type = type;
     }
 
