@@ -40,6 +40,4 @@ public class UserService {
     public User findUserByUsername(String username) throws SQLException {
         return userRepository.findByName(username);
     }
-
-
 }

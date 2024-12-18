@@ -1,4 +1,4 @@
-package java.at.fhtw.httpserver.utils;
+package at.fhtw.httpserver.utils;
 
 import at.fhtw.httpserver.server.Request;
 import at.fhtw.httpserver.utils.RequestBuilder;

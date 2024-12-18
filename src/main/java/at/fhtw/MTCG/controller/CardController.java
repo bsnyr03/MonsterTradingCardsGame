@@ -1,8 +1,5 @@
 package at.fhtw.MTCG.controller;
 
-import at.fhtw.MTCG.persistence.UnitOfWork;
-import at.fhtw.MTCG.persistence.repository.CardRepository;
-import at.fhtw.MTCG.persistence.repository.CardRepositoryImpl;
 import at.fhtw.MTCG.service.CardService;
 import at.fhtw.httpserver.http.ContentType;
 import at.fhtw.httpserver.http.HttpStatus;

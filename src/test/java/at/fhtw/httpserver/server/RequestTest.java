@@ -1,4 +1,4 @@
-package java.at.fhtw.httpserver.server;
+package at.fhtw.httpserver.server;
 
 import at.fhtw.httpserver.server.Request;
 import org.junit.jupiter.api.Test;

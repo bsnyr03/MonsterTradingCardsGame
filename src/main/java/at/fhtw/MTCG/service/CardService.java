@@ -1,18 +1,23 @@
 package at.fhtw.MTCG.service;
 
 import at.fhtw.MTCG.model.Card;
+import at.fhtw.MTCG.model.User;
+import at.fhtw.MTCG.persistence.repository.UserRepository;
 import at.fhtw.MTCG.persistence.repository.CardRepository;
 import at.fhtw.MTCG.persistence.repository.CardRepositoryImpl;
 import at.fhtw.MTCG.persistence.UnitOfWork;
+import at.fhtw.MTCG.persistence.repository.UserRepositoryImpl;
 
 import java.sql.SQLException;
 import java.util.Collection;
 
 public class CardService {
     private final CardRepository cardRepository;
+    private final UserRepository userRepository;
 
     public CardService() {
         this.cardRepository = new CardRepositoryImpl(new UnitOfWork());
+        this.userRepository = new UserRepositoryImpl(new UnitOfWork());
     }
 
     // Abrufen aller Karten
@@ -43,5 +48,21 @@ public class CardService {
     // Löschen einer Karte nach ID
     public boolean deleteCard(int id) throws SQLException {
         return cardRepository.delete(id);
+    }
+
+    public void buyPackage(User user, Package cardPackage) throws SQLException {
+        if (user.getCoins() < 5) {
+            throw new IllegalArgumentException("Not enough coins to buy a package.");
+        }
+
+        // 1. Benutzer-Coins reduzieren
+        user.setCoins(user.getCoins() - 5);
+        userRepository.updateCoins(user.getId(),
+                user.getCoins());
+
+        // 2. Karten aus dem Paket hinzufügen (Logik folgt später)
+        // Hier könnten wir die Karten dem Benutzer zuordnen
+
+        System.out.println("Package bought successfully. Remaining coins: " + user.getCoins());
     }
 }

@@ -83,4 +83,15 @@ public class UserRepositoryImpl implements UserRepository {
             statement.executeUpdate();
         }
     }
+
+    @Override
+    public void updateCoins(int userId, int coins) throws SQLException {
+        String sql = "UPDATE users SET coins = ? WHERE id = ?";
+        try (PreparedStatement statement = this.unitOfWork.prepareStatement(sql)) {
+            statement.setInt(1, coins);
+            statement.setInt(2, userId);
+            statement.executeUpdate();
+        }
+    }
+
 }
