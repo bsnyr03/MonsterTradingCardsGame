@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Map;
 
 
 public class UserController implements RestController {
@@ -75,7 +76,13 @@ public class UserController implements RestController {
 
 
                     // Antwort mit Token zurückgeben
-                    String jsonResponse = new ObjectMapper().writeValueAsString(existingUser);
+                    String jsonResponse = new ObjectMapper().writeValueAsString(
+                            Map.of(
+                                    "message", "User successfully logged in",
+                                    "username", existingUser.getUsername(),
+                                    "token", existingUser.getToken()
+                            )
+                    );
                     return new Response(
                             HttpStatus.OK,
                             ContentType.JSON,
