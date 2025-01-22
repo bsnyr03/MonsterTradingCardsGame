@@ -3,6 +3,9 @@ package at.fhtw.MTCG.persistence.repository;
 import at.fhtw.MTCG.persistence.UnitOfWork;
 import at.fhtw.MTCG.model.User;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,7 +20,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public User findByName(String username) throws SQLException{
+    public User findByName(String username) throws SQLException {
         String sql = "SELECT * FROM users WHERE username = ?";
         try (PreparedStatement statement = this.unitOfWork.prepareStatement(sql)) {
             statement.setString(1, username);
@@ -47,7 +50,8 @@ public class UserRepositoryImpl implements UserRepository {
                 User user = new User();
                 user.setId(resultSet.getInt("id"));
                 user.setUsername(resultSet.getString("username"));
-                user.setPassword(resultSet.getString("password"));
+                // Passwort wird gehasht
+                user.setPassword(hashPassword(resultSet.getString("password")));
                 user.setToken(resultSet.getString("token"));
                 userRows.add(user);
             }
@@ -57,9 +61,8 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
 
-
     @Override
-    public boolean saveUser(User user) throws SQLException{
+    public boolean saveUser(User user) throws SQLException {
         String sql = "INSERT INTO users (username, password, token) VALUES (?, ?, ?)";
         try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
             statement.setString(1, user.getUsername());
@@ -71,11 +74,11 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public void deleteUser(User user) {
-
+        // Noch nicht implementiert
     }
 
     @Override
-    public void updateTocken(String username, String token) throws SQLException{
+    public void updateTocken(String username, String token) throws SQLException {
         String sql = "UPDATE users SET token = ? WHERE username = ?";
         try (PreparedStatement statement = this.unitOfWork.prepareStatement(sql)) {
             statement.setString(1, token);
@@ -94,4 +97,20 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
 
+    /* Hilfsmethode zum Hashen von Passwörtern.*/
+    private String hashPassword(String password) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Fehler beim Hashen des Passworts", e);
+        }
+    }
 }
