@@ -9,6 +9,7 @@ public interface UserRepository {
     Collection<User> findAllUsers() throws IllegalAccessException;
     boolean saveUser(User user) throws SQLException;
     void deleteUser(User user);
+    User findByToken(String token) throws SQLException;
     void updateTocken(String username, String token) throws SQLException;
     void updateCoins(int id, int coins) throws SQLException;
 }

@@ -21,7 +21,6 @@ import java.util.Map;
 public class UserController implements RestController {
     private final UserService userService;
 
-
     public UserController() {
         this.userService = new UserService();
     }
@@ -63,10 +62,8 @@ public class UserController implements RestController {
             }
 
             try {
-                // Überprüfen, ob der Benutzer bereits existiert
                 User existingUser = userService.findUserByUsername(user.getUsername());
 
-                // Wenn der Benutzer existiert, einloggen
                 if (existingUser != null) {
                     String token = userService.loginUser(user.getUsername(), user.getPassword());
                     existingUser.setToken(token);
@@ -74,8 +71,6 @@ public class UserController implements RestController {
                     // Log für Terminal
                     System.out.println("User logged in: " + existingUser.getUsername() + " (Token: " + existingUser.getToken() + ")");
 
-
-                    // Antwort mit Token zurückgeben
                     String jsonResponse = new ObjectMapper().writeValueAsString(
                             Map.of(
                                     "message", "User successfully logged in",
@@ -98,22 +93,17 @@ public class UserController implements RestController {
                 );
             }
 
-            // Benutzer registrieren
             userService.registerUser(user);
 
             // Log für Terminal
             System.out.println("User registered successfully: " + user.getUsername());
 
-
-            // Erfolgsantwort
-            return new Response(HttpStatus.CREATED, ContentType.JSON, "{\"error\": \"User registered successfully.\"}");
+            return new Response(HttpStatus.CREATED, ContentType.JSON, "{\"message\": \"User registered successfully.\"}");
 
         } catch (IllegalArgumentException e) {
             return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"" + e.getMessage() + "\"}");
         } catch (SQLException e) {
             return new Response(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.JSON, "{\"error\": \"" + e.getMessage() + "\"}");
-        } catch (JsonMappingException e) {
-            throw new RuntimeException(e);
         } catch (JsonProcessingException e) {
             return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"" + e.getMessage() + "\"}");
         }
@@ -121,17 +111,37 @@ public class UserController implements RestController {
 
     private Response handleUserRequestGET(Request request) {
         try {
-            Collection<User> users = userService.findAllUsers();
 
+
+            Collection<User> users = userService.findAllUsers();
             String json = new ObjectMapper().writeValueAsString(users);
 
             return new Response(HttpStatus.OK, ContentType.JSON, json);
+        } catch (IllegalArgumentException e) {
+            return new Response(HttpStatus.UNAUTHORIZED, ContentType.JSON, "{\"error\": \"" + e.getMessage() + "\"}");
         } catch (SQLException e) {
             return new Response(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.JSON, "{\"error\": \"" + e.getMessage() + "\"}");
         } catch (JsonProcessingException e) {
             return new Response(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.JSON, "{\"error\": \"Error serializing data to JSON\"}");
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void validateToken(Request request) throws IllegalArgumentException, SQLException {
+        String authorizationHeader = request.getHeader("Authorization");
+
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("Missing or invalid Authorization header");
+        }
+
+        String token = authorizationHeader.substring(7);
+
+        // Überprüfe den Token in der Datenbank
+        boolean isValid = userService.validateToken(token);
+
+        if (!isValid) {
+            throw new IllegalArgumentException("Invalid or expired token");
         }
     }
 }

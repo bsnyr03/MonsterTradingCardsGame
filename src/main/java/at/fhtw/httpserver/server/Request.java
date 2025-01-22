@@ -101,4 +101,13 @@ public class Request {
     public void setPathParts(List<String> pathParts) {
         this.pathParts = pathParts;
     }
+
+    public String getHeader(String headerName){
+        if(this.headerMap != null){
+            return this.headerMap.getHeader(headerName);
+        }
+        return null;
+    }
+
+
 }

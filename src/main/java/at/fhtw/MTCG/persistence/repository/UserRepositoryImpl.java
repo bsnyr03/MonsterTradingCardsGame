@@ -85,6 +85,24 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public User findByToken(String token) throws SQLException {
+        String sql = "SELECT * FROM users WHERE token = ?";
+        try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
+            statement.setString(1, token);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                User user = new User();
+                user.setId(resultSet.getInt("id"));
+                user.setUsername(resultSet.getString("username"));
+                user.setPassword(resultSet.getString("password"));
+                user.setToken(resultSet.getString("token"));
+                return user;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public void updateTocken(String username, String token) throws SQLException {
         String sql = "UPDATE users SET token = ? WHERE username = ?";
         try {
