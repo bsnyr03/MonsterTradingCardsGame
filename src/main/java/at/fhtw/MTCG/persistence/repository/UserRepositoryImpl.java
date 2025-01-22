@@ -64,11 +64,18 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public boolean saveUser(User user) throws SQLException {
         String sql = "INSERT INTO users (username, password, token) VALUES (?, ?, ?)";
-        try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
-            statement.setString(1, user.getUsername());
-            statement.setString(2, user.getPassword());
-            statement.setString(3, user.getToken());
-            return statement.executeUpdate() > 0;
+        try {
+            try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
+                statement.setString(1, user.getUsername());
+                statement.setString(2, user.getPassword());
+                statement.setString(3, user.getToken());
+                boolean result = statement.executeUpdate() > 0;
+                unitOfWork.commitTransaction();
+                return result;
+            }
+        } catch (SQLException e) {
+            unitOfWork.rollbackTransaction();
+            throw e;
         }
     }
 
@@ -80,20 +87,32 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public void updateTocken(String username, String token) throws SQLException {
         String sql = "UPDATE users SET token = ? WHERE username = ?";
-        try (PreparedStatement statement = this.unitOfWork.prepareStatement(sql)) {
-            statement.setString(1, token);
-            statement.setString(2, username);
-            statement.executeUpdate();
+        try {
+            try (PreparedStatement statement = this.unitOfWork.prepareStatement(sql)) {
+                statement.setString(1, token);
+                statement.setString(2, username);
+                statement.executeUpdate();
+                unitOfWork.commitTransaction();
+            }
+        } catch (SQLException e) {
+            unitOfWork.rollbackTransaction();
+            throw e;
         }
     }
 
     @Override
     public void updateCoins(int userId, int coins) throws SQLException {
         String sql = "UPDATE users SET coins = ? WHERE id = ?";
-        try (PreparedStatement statement = this.unitOfWork.prepareStatement(sql)) {
-            statement.setInt(1, coins);
-            statement.setInt(2, userId);
-            statement.executeUpdate();
+        try {
+            try (PreparedStatement statement = this.unitOfWork.prepareStatement(sql)) {
+                statement.setInt(1, coins);
+                statement.setInt(2, userId);
+                statement.executeUpdate();
+                unitOfWork.commitTransaction();
+            }
+        } catch (SQLException e) {
+            unitOfWork.rollbackTransaction();
+            throw e;
         }
     }
 
