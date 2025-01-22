@@ -36,9 +36,6 @@ public class CardService {
 
     // Erstellen einer neuen Karte
     public boolean createCard(Card card) throws SQLException {
-        if (card.getId() == 0) {
-            throw new IllegalArgumentException("Card ID cannot be 0");
-        }
         if (card.getName() == null || card.getName().isEmpty()) {
             throw new IllegalArgumentException("Card name cannot be null or empty");
         }

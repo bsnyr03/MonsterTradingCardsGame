@@ -1,86 +1,137 @@
 @startuml
-'https://plantuml.com/sequence-diagram
 
+package "Model" {
+    class User {
+        - int id
+        - String username
+        - String password
+        - String token
+        - int coins
+    }
 
-title Monster Trading Cards Game Class Diagram
+    class Card {
+        - int id
+        - String name
+        - double damage
+        - ElementTypeEnum element
+        - CardTypeEnum type
+    }
 
-' Define main classes
-class User {
-  - String username
-  - String password
-  - int coins = 20
-  - Stack stack
-  - Deck deck
-  - int ELO = 100
-  + register()
-  + login()
-  + acquireCards()
-  + defineDeck()
-  + battle(User opponent)
-  + tradeCard(Card offeredCard, Card requiredCard)
+    class Package {
+        - int id
+        - List<Card> cards
+    }
+
+    class Deck {
+        - String userId
+        - List<Card> cards
+    }
+
+    enum ElementTypeEnum {
+        FIRE
+        WATER
+        NORMAL
+    }
+
+    enum CardTypeEnum {
+        MONSTER
+        SPELL
+    }
 }
 
-class Card {
-  - String name
-  - int damage
-  + getDamage()
+package "Controller" {
+    class UserController {
+        + handleRequest(Request): Response
+    }
+
+    class CardController {
+        + handleRequest(Request): Response
+    }
+
+    class PackageController {
+        + handleRequest(Request): Response
+    }
+
+    class BattleController {
+        + handleRequest(Request): Response
+    }
 }
 
-class SpellCard extends Card {
-  - ElementType element
+package "Service" {
+    class UserService {
+        + registerUser(User): boolean
+        + loginUser(String, String): String
+        + getUserByToken(String): User
+    }
+
+    class CardService {
+        + save(Card): boolean
+        + getAllCards(): List<Card>
+    }
+
+    class PackageService {
+        + createPackage(Package): boolean
+        + acquirePackage(String): List<Card>
+    }
+
+    class BattleService {
+        + startBattle(String, String): String
+    }
 }
 
-class MonsterCard extends Card {
-  - ElementType element
-  + applySpecialty(MonsterCard opponent)
+package "Persistence" {
+    class UserRepository {
+        + findByName(String): User
+        + saveUser(User): boolean
+        + updateToken(String, String): void
+    }
+
+    class CardRepository {
+        + save(Card): boolean
+        + findAll(): List<Card>
+    }
+
+    class PackageRepository {
+        + save(Package): boolean
+        + getNextPackage(): Package
+    }
+
+    class DeckRepository {
+        + saveDeck(Deck): boolean
+        + getDeckByUser(String): Deck
+    }
 }
 
-enum ElementType {
-  Fire
-  Water
-  Normal
+package "HTTP" {
+    class Request {
+        - Method method
+        - String body
+        - Map<String, String> headers
+    }
+
+    class Response {
+        - int statusCode
+        - String body
+        - String contentType
+    }
+
+    enum Method {
+        GET
+        POST
+        PUT
+        DELETE
+    }
 }
 
-class Package {
-  - List<Card> cards = 5
-  + acquire()
-}
+UserController --> UserService
+CardController --> CardService
+PackageController --> PackageService
+BattleController --> BattleService
 
-class Stack {
-  - List<Card> cards
-  + addCard(Card card)
-  + removeCard(Card card)
-}
-
-class Deck {
-  - List<Card> cards = 4
-  + selectBestCards()
-  + getCardForBattle()
-}
-
-class Battle {
-  - User player1
-  - User player2
-  + startBattle()
-}
-
-class Scoreboard {
-  - List<User> players
-  + displayScores()
-  + updateELO(User winner, User loser)
-}
-
-' Define relationships
-User "1" *-- "1" Stack : has
-User "1" *-- "1" Deck : has
-User "1" *-- "1" Scoreboard : ranks on
-User "1" *-- "many" Package : acquires
-User "1" *-- "1" Battle : participates in
-
-Package "1" *-- "5" Card : contains
-Stack "1" *-- "many" Card : contains
-Deck "1" *-- "4" Card : contains
-Battle "1" *-- "2" User : between
-Scoreboard "1" *-- "many" User : ranks
+UserService --> UserRepository
+CardService --> CardRepository
+PackageService --> PackageRepository
+BattleService --> DeckRepository
+DeckRepository --> CardRepository
 
 @enduml

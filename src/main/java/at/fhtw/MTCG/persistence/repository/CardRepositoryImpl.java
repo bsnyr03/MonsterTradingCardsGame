@@ -60,13 +60,12 @@ public class CardRepositoryImpl implements CardRepository {
 
     @Override
     public boolean save(Card card) throws SQLException {
-        String sql = "INSERT INTO cards (id, name, damage, element, type) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO cards (name, damage, element, type) VALUES (?, ?, ?, ?)";
         try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
-            statement.setInt(1, card.getId());
-            statement.setString(2, card.getName());
-            statement.setDouble(3, card.getDamage());
-            statement.setString(4, card.getElement().toString());
-            statement.setString(5, card.getType().toString());
+            statement.setString(1, card.getName());
+            statement.setDouble(2, card.getDamage());
+            statement.setString(3, card.getElement().toString());
+            statement.setString(4, card.getType().toString());
             return statement.executeUpdate() > 0;
         }
     }
