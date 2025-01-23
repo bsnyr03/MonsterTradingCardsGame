@@ -65,47 +65,29 @@ public class UserController implements RestController {
                 User existingUser = userService.findUserByUsername(user.getUsername());
 
                 if (existingUser != null) {
-                    String token = userService.loginUser(user.getUsername(), user.getPassword());
-                    existingUser.setToken(token);
-
-                    // Log für Terminal
-                    System.out.println("User logged in: " + existingUser.getUsername() + " (Token: " + existingUser.getToken() + ")");
-
-                    String jsonResponse = new ObjectMapper().writeValueAsString(
-                            Map.of(
-                                    "message", "User successfully logged in",
-                                    "username", existingUser.getUsername(),
-                                    "token", existingUser.getToken()
-                            )
-                    );
                     return new Response(
-                            HttpStatus.OK,
+                            HttpStatus.CONFLICT,
                             ContentType.JSON,
-                            jsonResponse
+                            "{\"error\": \"Username already exists\"}"
                     );
                 }
-
-            } catch (IllegalArgumentException e) {
-                return new Response(
-                        HttpStatus.UNAUTHORIZED,
-                        ContentType.JSON,
-                        "{\"success\": \"Invalid username or password\"}"
-                );
+            } catch (IllegalArgumentException ignored) {
             }
 
             userService.registerUser(user);
 
-            // Log für Terminal
             System.out.println("User registered successfully: " + user.getUsername());
 
-            return new Response(HttpStatus.CREATED, ContentType.JSON, "{\"message\": \"User registered successfully.\"}");
+            return new Response(
+                    HttpStatus.CREATED,
+                    ContentType.JSON,
+                    "{\"message\": \"User registered successfully.\"}"
+            );
 
-        } catch (IllegalArgumentException e) {
-            return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"" + e.getMessage() + "\"}");
+        } catch (JsonProcessingException e) {
+            return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"Invalid JSON format\"}");
         } catch (SQLException e) {
             return new Response(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.JSON, "{\"error\": \"" + e.getMessage() + "\"}");
-        } catch (JsonProcessingException e) {
-            return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"" + e.getMessage() + "\"}");
         }
     }
 

@@ -20,7 +20,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public User findByName(String username) throws SQLException {
+    public User findByUsername(String username) throws SQLException {
         String sql = "SELECT * FROM users WHERE username = ?";
         try (PreparedStatement statement = this.unitOfWork.prepareStatement(sql)) {
             statement.setString(1, username);

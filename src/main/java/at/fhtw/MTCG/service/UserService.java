@@ -15,26 +15,31 @@ public class UserService {
     }
 
     public boolean registerUser(User user) throws SQLException {
-        if (userRepository.findByName(user.getUsername()) != null) {
+        if (userRepository.findByUsername(user.getUsername()) != null) {
             throw new IllegalStateException("User already exists");
         }
         return userRepository.saveUser(user);
     }
 
-    public String loginUser(String username, String password) throws SQLException {
-        User user = userRepository.findByName(username);
+    public String loginUser(String username, String password) throws IllegalArgumentException, SQLException {
+        User user = userRepository.findByUsername(username);
+
         if (user == null || !user.getPassword().equals(password)) {
             throw new IllegalArgumentException("Invalid username or password");
         }
 
-        // Überprüfen, ob bereits ein Token existiert
+        // Token wird nur beim ersten Login generiert oder wiederverwendet
         if (user.getToken() == null || user.getToken().isEmpty()) {
-            String token = "mtcgToken-" + username;
+            String token = generateToken(username);
+            user.setToken(token);
             userRepository.updateTocken(username, token);
-            user.setToken(token); // Token speichern
         }
 
-        return user.getToken(); // Bereits existierenden oder neuen Token zurückgeben
+        return user.getToken();
+    }
+
+    private String generateToken(String username) {
+        return "mtcgToken-" + username + "-" + System.currentTimeMillis();
     }
 
     public boolean validateToken(String token) throws SQLException {
@@ -47,6 +52,6 @@ public class UserService {
     }
 
     public User findUserByUsername(String username) throws SQLException {
-        return userRepository.findByName(username);
+        return userRepository.findByUsername(username);
     }
 }
