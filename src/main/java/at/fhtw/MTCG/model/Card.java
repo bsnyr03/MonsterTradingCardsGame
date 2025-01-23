@@ -73,4 +73,14 @@ public class Card {
                 ", type=" + type +
                 '}';
     }
+
+    public double calculateDamageAgainst(Card opponentCard) {
+        if (this.type == CardTypeEnum.MONSTER && opponentCard.type == CardTypeEnum.MONSTER) {
+            return this.damage; // Elemente beeinflussen Monsterkämpfe nicht
+        }
+
+        // Berechnung basierend auf Effektivität
+        double effectiveness = this.element.calculateEffectiveness(opponentCard.element);
+        return this.damage * effectiveness;
+    }
 }
