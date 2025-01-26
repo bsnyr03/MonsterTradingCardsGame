@@ -1,6 +1,6 @@
 package at.fhtw.MTCG.controller;
 
-import at.fhtw.MTCG.model.User;
+import at.fhtw.MTCG.model.Card;
 import at.fhtw.MTCG.service.CardService;
 import at.fhtw.MTCG.service.UserService;
 import at.fhtw.httpserver.http.ContentType;
@@ -9,7 +9,6 @@ import at.fhtw.httpserver.http.Method;
 import at.fhtw.httpserver.server.Request;
 import at.fhtw.httpserver.server.Response;
 import at.fhtw.httpserver.server.RestController;
-import at.fhtw.MTCG.model.Card;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -25,15 +24,14 @@ public class CardController implements RestController {
         this.userService = new UserService();
     }
 
-
     @Override
     public Response handleRequest(Request request) {
-        try{
-            if(request.getMethod() == Method.GET){
+        try {
+            if (request.getMethod() == Method.GET) {
                 return handleGetRequest(request);
-            }else if (request.getMethod() == Method.POST){
+            } else if (request.getMethod() == Method.POST) {
                 return handlePostRequest(request);
-            }else if(request.getMethod() == Method.DELETE){
+            } else if (request.getMethod() == Method.DELETE) {
                 return handleDeleteRequest(request);
             }
             return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"Invalid request method\"}");
@@ -43,59 +41,64 @@ public class CardController implements RestController {
     }
 
     private Response handleGetRequest(Request request) throws SQLException, JsonProcessingException {
-        try{
+        try {
             validateToken(request);
 
-            if (request.getPathParts().size() > 1) {
-            int cardId = Integer.parseInt(request.getPathParts().get(1));
-            Card card = cardService.getCardById(cardId);
+            // Abrufen der Karten eines Benutzers basierend auf dem Token
+            String token = extractTokenFromRequest(request);
+            Collection<Card> userCards = cardService.getCardsByToken(token);
 
-            if (card != null) {
-                String json = new ObjectMapper().writeValueAsString(card);
-                return new Response(HttpStatus.OK, ContentType.JSON, json);
-            } else {
-                return new Response(HttpStatus.NOT_FOUND, ContentType.JSON, "{\"error\": \"Card not found\"}");
-            }
-        } else {
-            Collection<Card> cards = cardService.getAllCards();
-            String json = new ObjectMapper().writeValueAsString(cards);
+            String json = new ObjectMapper().writeValueAsString(userCards);
             return new Response(HttpStatus.OK, ContentType.JSON, json);
-        }
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return new Response(HttpStatus.UNAUTHORIZED, ContentType.JSON, "{\"error\": \"" + e.getMessage() + "\"}");
         }
     }
 
     private Response handlePostRequest(Request request) throws JsonProcessingException, SQLException {
-        try{
+        try {
             validateToken(request);
-        Card card = new ObjectMapper().readValue(request.getBody(), Card.class);
 
-        if (cardService.createCard(card)) {
-            return new Response(HttpStatus.CREATED, ContentType.JSON, "{\"message\": \"Card created successfully\"}");
-        } else {
-            return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"Failed to create card\"}");
-        }
-        }catch(IllegalArgumentException e){
+            String token = extractTokenFromRequest(request);
+
+            if (request.getPathParts().size() > 1 && "assign".equals(request.getPathParts().get(1))) {
+                // Zuordnung von Karten zu Benutzern
+                Card card = new ObjectMapper().readValue(request.getBody(), Card.class);
+                if (cardService.assignCardToUser(String.valueOf(card.getId()), token)) {
+                    return new Response(HttpStatus.CREATED, ContentType.JSON, "{\"message\": \"Card successfully assigned to user\"}");
+                } else {
+                    return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"Failed to assign card to user\"}");
+                }
+            }
+
+            // Erstellung einer neuen Karte
+            Card card = new ObjectMapper().readValue(request.getBody(), Card.class);
+            if (cardService.createCard(card)) {
+                return new Response(HttpStatus.CREATED, ContentType.JSON, "{\"message\": \"Card created successfully\"}");
+            } else {
+                return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"Failed to create card\"}");
+            }
+        } catch (IllegalArgumentException e) {
             return new Response(HttpStatus.UNAUTHORIZED, ContentType.JSON, "{\"error\": \"" + e.getMessage() + "\"}");
         }
     }
 
     private Response handleDeleteRequest(Request request) throws SQLException {
-        try{
+        try {
             validateToken(request);
-        if (request.getPathParts().size() > 1) {
-            int cardId = Integer.parseInt(request.getPathParts().get(1));
 
-            if (cardService.deleteCard(cardId)) {
-                return new Response(HttpStatus.OK, ContentType.JSON, "{\"message\": \"Card deleted successfully\"}");
+            if (request.getPathParts().size() > 1) {
+                int cardId = Integer.parseInt(request.getPathParts().get(1));
+
+                if (cardService.deleteCard(cardId)) {
+                    return new Response(HttpStatus.OK, ContentType.JSON, "{\"message\": \"Card deleted successfully\"}");
+                } else {
+                    return new Response(HttpStatus.NOT_FOUND, ContentType.JSON, "{\"error\": \"Card not found\"}");
+                }
             } else {
-                return new Response(HttpStatus.NOT_FOUND, ContentType.JSON, "{\"error\": \"Card not found\"}");
+                return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"Card ID required for deletion\"}");
             }
-        } else {
-            return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"Card ID required for deletion\"}");
-        }
-        }catch(IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return new Response(HttpStatus.UNAUTHORIZED, ContentType.JSON, "{\"error\": \"" + e.getMessage() + "\"}");
         }
     }
@@ -108,11 +111,15 @@ public class CardController implements RestController {
         }
 
         String token = authorizationHeader.substring(7); // "Bearer " abschneiden
-
         boolean isValid = userService.validateToken(token);
 
         if (!isValid) {
             throw new IllegalArgumentException("Invalid or expired token");
         }
+    }
+
+    private String extractTokenFromRequest(Request request) {
+        String authorizationHeader = request.getHeader("Authorization");
+        return authorizationHeader.substring(7); // "Bearer " abschneiden
     }
 }

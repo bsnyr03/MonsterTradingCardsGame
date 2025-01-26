@@ -62,4 +62,11 @@ public class CardService {
 
         System.out.println("Package bought successfully. Remaining coins: " + user.getCoins());
     }
+    public boolean assignCardToUser(String cardId, String token) throws SQLException {
+        return cardRepository.assignCardToUser(Integer.parseInt(cardId), token);
+    }
+    public Collection<Card> getCardsByToken(String token) throws SQLException {
+        return cardRepository.findCardsByToken(token);
+    }
+
 }

@@ -92,5 +92,44 @@ public class CardRepositoryImpl implements CardRepository {
             throw e;
         }
     }
+    public boolean assignCardToUser(int cardId, String token) throws SQLException {
+        String sql = "UPDATE cards SET user_id = (SELECT id FROM users WHERE token = ?) WHERE id = ?";
+        try{
+            try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
+            statement.setString(1, token);
+            statement.setInt(2, cardId);
+            boolean result = statement.executeUpdate() > 0;
+            unitOfWork.commitTransaction();
+            return result;
+            }
+        } catch (SQLException e) {
+        unitOfWork.rollbackTransaction();
+        throw e;
+        }
+    }
+    public Collection<Card> findCardsByToken(String token) throws SQLException {
+        String sql = """
+        SELECT c.id, c.name, c.damage, c.element, c.type
+        FROM cards c
+        JOIN users u ON c.user_id = u.id
+        WHERE u.token = ?
+    """;
+        try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
+            statement.setString(1, token);
+            ResultSet resultSet = statement.executeQuery();
+            Collection<Card> cards = new ArrayList<>();
+            while (resultSet.next()) {
+                cards.add(new Card(
+                        resultSet.getInt("id"),
+                        resultSet.getString("name"),
+                        resultSet.getDouble("damage"),
+                        ElementTypeEnum.valueOf(resultSet.getString("element")),
+                        CardTypeEnum.valueOf(resultSet.getString("type"))
+                ));
+            }
+            return cards;
+        }
+    }
+
 }
 

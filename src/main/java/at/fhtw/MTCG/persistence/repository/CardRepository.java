@@ -10,4 +10,6 @@ public interface CardRepository {
     Collection<Card> findAll() throws SQLException;
     boolean save(Card card) throws SQLException;
     boolean delete(int card) throws SQLException;
+    boolean assignCardToUser(int cardId, String token) throws SQLException;
+    Collection<Card> findCardsByToken(String token) throws SQLException;
 }
