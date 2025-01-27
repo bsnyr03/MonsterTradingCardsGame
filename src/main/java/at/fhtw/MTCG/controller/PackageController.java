@@ -27,11 +27,7 @@ public class PackageController implements RestController {
     public Response handleRequest(Request request) {
         try {
             if (request.getMethod() == Method.POST) {
-                if (request.getPathname().equals("/packages")) {
-                    return handlePostPackage(request); // Package erstellen
-                } else if (request.getPathname().equals("/transactions/packages")) {
-                    return handleBuyPackage(request); // Package kaufen
-                }
+                return handlePostPackage(request); // Package erstellen
             } else if (request.getMethod() == Method.GET) {
                 return handleGetPackages(request); // Alle Packages abrufen
             }
@@ -68,28 +64,6 @@ public class PackageController implements RestController {
             return new Response(HttpStatus.CREATED, ContentType.JSON, jsonResponse);
         } else {
             return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"Failed to create package.\"}");
-        }
-    }
-
-    private Response handleBuyPackage(Request request) throws SQLException, JsonProcessingException {
-        String token = request.getHeader("Authorization");
-        if (token == null || !token.startsWith("Bearer ")) {
-            return new Response(HttpStatus.UNAUTHORIZED, ContentType.JSON, "{\"error\": \"Missing or invalid token\"}");
-        }
-        token = token.replace("Bearer ", "").trim();
-
-        try {
-            // Kaufe ein Paket
-            List<Card> purchasedCards = packageService.buyPackage(token);
-
-            String jsonResponse = new ObjectMapper().writeValueAsString(Map.of(
-                    "message", "Package successfully purchased",
-                    "cards", purchasedCards
-            ));
-
-            return new Response(HttpStatus.OK, ContentType.JSON, jsonResponse);
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"" + e.getMessage() + "\"}");
         }
     }
 

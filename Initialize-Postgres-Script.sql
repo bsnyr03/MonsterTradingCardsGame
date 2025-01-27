@@ -43,6 +43,8 @@ CREATE TABLE packages (
 
 ALTER TABLE packages ADD COLUMN user_id INTEGER REFERENCES users(id);
 
+ALTER TABLE users ADD COLUMN coins INTEGER DEFAULT 20 NOT NULL;
+
 
 /* Tabellen leeren */
 DELETE FROM users;
