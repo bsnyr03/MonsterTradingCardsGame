@@ -40,7 +40,6 @@ public class TransactionsController implements RestController {
         token = token.replace("Bearer ", "").trim();
 
         try {
-            // Kaufe ein Paket
             var purchasedCards = packageService.buyPackage(token);
 
             String jsonResponse = new ObjectMapper().writeValueAsString(Map.of(

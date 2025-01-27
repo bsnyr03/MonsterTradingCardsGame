@@ -42,7 +42,6 @@ public class PackageController implements RestController {
         Map<String, Object> requestBody = new ObjectMapper().readValue(request.getBody(), Map.class);
 
         String packageName = (String) requestBody.get("name");
-
         List<Card> cards = new ObjectMapper().convertValue(requestBody.get("cards"), new TypeReference<List<Card>>() {});
 
         if (packageName == null || packageName.isEmpty()) {
@@ -53,15 +52,10 @@ public class PackageController implements RestController {
             return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"A package must contain exactly 5 cards.\"}");
         }
 
-        // Erstelle das Paket
         if (packageService.createPackage(packageName, cards)) {
-            int packageId = packageService.getLatestPackageId();
-            String jsonResponse = new ObjectMapper().writeValueAsString(Map.of(
-                    "id", packageId,
-                    "name", packageName,
-                    "cards", cards
-            ));
-            return new Response(HttpStatus.CREATED, ContentType.JSON, jsonResponse);
+            // Erfolgreiche Antwort mit dem Paketnamen
+            String successMessage = String.format("{\"message\": \"Package '%s' was successfully created.\"}", packageName);
+            return new Response(HttpStatus.CREATED, ContentType.JSON, successMessage);
         } else {
             return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"Failed to create package.\"}");
         }
