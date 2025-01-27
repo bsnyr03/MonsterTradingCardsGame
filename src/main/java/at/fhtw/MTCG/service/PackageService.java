@@ -72,4 +72,17 @@ public class PackageService {
     public int getLatestPackageId() throws SQLException {
         return packageRepository.findLatestPackageId();
     }
+
+    public boolean hasEnoughCoins(String token) throws SQLException {
+        int userCoins = packageRepository.getCoinsByToken(token);
+        return userCoins >= 5; // 5 Coins für den Kauf
+    }
+
+    public boolean hasAvailablePackages() throws SQLException {
+        return packageRepository.getAvailablePackageId() != -1; // -1 bedeutet kein Paket verfügbar
+    }
+
+    public boolean canUserPurchasePackage(String token) throws SQLException {
+        return hasEnoughCoins(token) && hasAvailablePackages();
+    }
 }

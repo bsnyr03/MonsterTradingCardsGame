@@ -1,9 +1,6 @@
 package at.fhtw;
 
-import at.fhtw.MTCG.controller.CardController;
-import at.fhtw.MTCG.controller.PackageController;
-import at.fhtw.MTCG.controller.SessionsController;
-import at.fhtw.MTCG.controller.UserController;
+import at.fhtw.MTCG.controller.*;
 import at.fhtw.httpserver.server.Server;
 import at.fhtw.httpserver.utils.Router;
 
@@ -26,6 +23,7 @@ public class Main {
         router.addService("/users", new UserController());
         router.addService("/cards", new CardController());
         router.addService("/packages", new PackageController());
+        router.addService("/transactions/packages", new TransactionsController());
         router.addService("/sessions", new SessionsController());
         return router;
     }
