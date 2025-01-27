@@ -20,27 +20,47 @@ public class PackageController implements RestController {
     private final PackageService packageService;
 
     public PackageController() {
-        this.packageService=new PackageService(new CardService());
+        this.packageService = new PackageService();
     }
 
     @Override
     public Response handleRequest(Request request) {
         try {
             if (request.getMethod() == Method.POST) {
-                return handlePostRequest(request);
+                return handleCreatePackage(request);
+            } else if (request.getMethod() == Method.GET) {
+                return handleGetPackages(request);
             }
+
             return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"Invalid request method\"}");
         } catch (Exception e) {
             return new Response(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.JSON, "{\"error\": \"" + e.getMessage() + "\"}");
         }
     }
 
-    private Response handlePostRequest(Request request) throws JsonProcessingException, SQLException {
+    private Response handleCreatePackage(Request request) throws JsonProcessingException, SQLException {
+
         List<Card> cards = new ObjectMapper().readValue(request.getBody(), new TypeReference<List<Card>>() {});
         if (packageService.createPackage(cards)) {
             return new Response(HttpStatus.CREATED, ContentType.JSON, "{\"message\": \"Package created successfully\"}");
         } else {
             return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"Failed to create package\"}");
         }
+    }
+
+    private Response handleGetPackages(Request request) throws SQLException, JsonProcessingException {
+
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
+        if (token == null || token.isEmpty()) {
+            return new Response(HttpStatus.UNAUTHORIZED, ContentType.JSON, "{\"error\": \"Missing or invalid token\"}");
+        }
+
+        var packages = packageService.getPackagesByToken(token);
+        if (packages.isEmpty()) {
+            return new Response(HttpStatus.NOT_FOUND, ContentType.JSON, "{\"error\": \"No packages found\"}");
+        }
+
+        String jsonResponse = new ObjectMapper().writeValueAsString(packages);
+        return new Response(HttpStatus.OK, ContentType.JSON, jsonResponse);
     }
 }

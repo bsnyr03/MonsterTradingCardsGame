@@ -34,4 +34,9 @@ CREATE TABLE cards
 INSERT INTO cards (name, damage, element, type) VALUES ('FireGoblin', '50', 'FIRE', 'MONSTER');
 INSERT INTO cards (name, damage, element, type) VALUES ('WaterSpell', '40', 'WATER', 'SPELL');
 
-
+CREATE TABLE packages (
+                          id SERIAL PRIMARY KEY,
+                          name VARCHAR(100) NOT NULL,
+                          sold BOOLEAN DEFAULT FALSE NOT NULL,
+                          cards JSONB NOT NULL
+);
