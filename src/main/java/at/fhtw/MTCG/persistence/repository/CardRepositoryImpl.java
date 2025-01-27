@@ -5,11 +5,13 @@ import at.fhtw.MTCG.model.enums.CardTypeEnum;
 import at.fhtw.MTCG.model.enums.ElementTypeEnum;
 import at.fhtw.MTCG.persistence.UnitOfWork;
 
+import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class CardRepositoryImpl implements CardRepository {
     private final UnitOfWork unitOfWork;
@@ -92,6 +94,8 @@ public class CardRepositoryImpl implements CardRepository {
             throw e;
         }
     }
+
+    @Override
     public boolean assignCardToUser(int cardId, String token) throws SQLException {
         String sql = "UPDATE cards SET user_id = (SELECT id FROM users WHERE token = ?) WHERE id = ?";
         try{
@@ -107,6 +111,8 @@ public class CardRepositoryImpl implements CardRepository {
         throw e;
         }
     }
+
+    @Override
     public Collection<Card> findCardsByToken(String token) throws SQLException {
         String sql = """
         SELECT c.id, c.name, c.damage, c.element, c.type
@@ -131,5 +137,33 @@ public class CardRepositoryImpl implements CardRepository {
         }
     }
 
+    @Override
+    public List<Card> findCardsByIds(List<Integer> cardIds) throws SQLException {
+        StringBuilder inClause = new StringBuilder("?");
+        for (int i = 1; i < cardIds.size(); i++) {
+            inClause.append(", ?");
+        }
+
+        String sql = "SELECT * FROM cards WHERE id IN (" + inClause + ")";
+        try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
+            // Setze die IDs dynamisch in die PreparedStatement-Parameter
+            for (int i = 0; i < cardIds.size(); i++) {
+                statement.setInt(i + 1, cardIds.get(i));
+            }
+
+            ResultSet resultSet = statement.executeQuery();
+            List<Card> cards = new ArrayList<>();
+            while (resultSet.next()) {
+                cards.add(new Card(
+                        resultSet.getInt("id"),
+                        resultSet.getString("name"),
+                        resultSet.getDouble("damage"),
+                        ElementTypeEnum.valueOf(resultSet.getString("element")),
+                        CardTypeEnum.valueOf(resultSet.getString("type"))
+                ));
+            }
+            return cards;
+        }
+    }
 }
 

@@ -12,4 +12,5 @@ public interface UserRepository {
     User findByToken(String token) throws SQLException;
     void updateTocken(String username, String token) throws SQLException;
     void updateCoins(int id, int coins) throws SQLException;
+    int findUserIdByToken(String token) throws SQLException;
 }

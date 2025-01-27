@@ -45,6 +45,12 @@ ALTER TABLE packages ADD COLUMN user_id INTEGER REFERENCES users(id);
 
 ALTER TABLE users ADD COLUMN coins INTEGER DEFAULT 20 NOT NULL;
 
+CREATE TABLE decks (
+                       id SERIAL PRIMARY KEY,
+                       user_id INTEGER NOT NULL REFERENCES users(id),
+                       cards JSONB NOT NULL
+);
+
 
 /* Tabellen leeren */
 DELETE FROM users;
@@ -54,3 +60,7 @@ DELETE FROM packages;
 /* Tabellen zurücksetzen */
 TRUNCATE TABLE cards RESTART IDENTITY;
 TRUNCATE TABLE packages RESTART IDENTITY;
+
+/* Coins zurücksetzen */
+UPDATE users
+SET coins = 20;

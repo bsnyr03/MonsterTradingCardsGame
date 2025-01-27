@@ -19,9 +19,11 @@ import java.util.List;
 
 public class PackageRepositoryImpl implements PackageRepository {
     private final UnitOfWork unitOfWork;
+    private final UserRepository userRepository;
 
     public PackageRepositoryImpl(UnitOfWork unitOfWork) {
         this.unitOfWork = unitOfWork;
+        this.userRepository = new UserRepositoryImpl(unitOfWork);
     }
 
     @Override
@@ -108,21 +110,8 @@ public class PackageRepositoryImpl implements PackageRepository {
         }
     }
 
-    public int findUserIdByToken(String token) throws SQLException {
-        String sql = "SELECT id FROM users WHERE token = ?";
-        try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
-            statement.setString(1, token);
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                return resultSet.getInt("id");
-            }
-        }
-        throw new IllegalArgumentException("Invalid token: User not found");
-    }
-
     public Collection<Package> findPackagesByToken(String token) throws SQLException {
-        int userId = findUserIdByToken(token);
-
+        int userId = userRepository.findUserIdByToken(token);
         String sql = """
         SELECT p.id, p.name, p.cards
         FROM packages p

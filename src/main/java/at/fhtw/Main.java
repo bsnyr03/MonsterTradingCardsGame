@@ -25,6 +25,7 @@ public class Main {
         router.addService("/packages", new PackageController());
         router.addService("/transactions", new TransactionsController());
         router.addService("/sessions", new SessionsController());
+        router.addService("/decks", new DeckController());
         return router;
     }
 }

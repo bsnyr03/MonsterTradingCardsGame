@@ -5,6 +5,8 @@ import at.fhtw.MTCG.model.Package;
 import at.fhtw.MTCG.persistence.repository.PackageRepository;
 import at.fhtw.MTCG.persistence.repository.PackageRepositoryImpl;
 import at.fhtw.MTCG.persistence.UnitOfWork;
+import at.fhtw.MTCG.persistence.repository.UserRepository;
+import at.fhtw.MTCG.persistence.repository.UserRepositoryImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.sql.SQLException;
@@ -13,10 +15,12 @@ import java.util.*;
 public class PackageService {
     private final PackageRepository packageRepository;
     private final CardService cardService;
+    private final UserRepository userRepository;
 
     public PackageService() {
         this.packageRepository = new PackageRepositoryImpl(new UnitOfWork());
         this.cardService = new CardService();
+        this.userRepository = new UserRepositoryImpl(new UnitOfWork());
     }
 
     public boolean createPackage(String packageName, List<Card> cards) throws SQLException, JsonProcessingException {
@@ -51,7 +55,7 @@ public class PackageService {
 
         packageRepository.updateCoins(token, coins - 5);
 
-        int userId = packageRepository.findUserIdByToken(token);
+        int userId = userRepository.findUserIdByToken(token);
         packageRepository.markPackageAsSold(packageId, userId);
 
         return cards;

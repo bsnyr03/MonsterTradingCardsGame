@@ -134,7 +134,6 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
 
-    /* Hilfsmethode zum Hashen von Passwörtern.*/
     private String hashPassword(String password) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -149,5 +148,17 @@ public class UserRepositoryImpl implements UserRepository {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("Fehler beim Hashen des Passworts", e);
         }
+    }
+
+    public int findUserIdByToken(String token) throws SQLException {
+        String sql = "SELECT id FROM users WHERE token = ?";
+        try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
+            statement.setString(1, token);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt("id");
+            }
+        }
+        throw new IllegalArgumentException("Invalid token: User not found");
     }
 }
