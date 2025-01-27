@@ -5,6 +5,7 @@ import at.fhtw.MTCG.model.Package;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 
 public interface PackageRepository {
@@ -12,8 +13,8 @@ public interface PackageRepository {
     int getAvailablePackageId() throws SQLException;
     List<Card> getCardsByPackageId(int packageId) throws SQLException;
     void updateCoins(String token, int newCoins) throws SQLException;
-    void markPackageAsSold(int packageId) throws SQLException;
+    void markPackageAsSold(int packageId, int userId) throws SQLException;
     boolean createPackage(String packageName, List<Card> cards) throws SQLException, JsonProcessingException;
-    List<Package> findPackagesByToken(String token) throws SQLException;
-    int findLatestPackageId() throws SQLException;
+    int findUserIdByToken(String token) throws SQLException;
+    Collection<Package> findPackagesByToken(String token) throws SQLException;
 }

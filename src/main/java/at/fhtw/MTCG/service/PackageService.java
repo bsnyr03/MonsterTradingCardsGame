@@ -51,7 +51,8 @@ public class PackageService {
 
         packageRepository.updateCoins(token, coins - 5);
 
-        packageRepository.markPackageAsSold(packageId);
+        int userId = packageRepository.findUserIdByToken(token);
+        packageRepository.markPackageAsSold(packageId, userId);
 
         return cards;
     }
@@ -69,9 +70,7 @@ public class PackageService {
         }
         return result;
     }
-    public int getLatestPackageId() throws SQLException {
-        return packageRepository.findLatestPackageId();
-    }
+
 
     public boolean hasEnoughCoins(String token) throws SQLException {
         int userCoins = packageRepository.getCoinsByToken(token);

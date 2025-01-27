@@ -1,8 +1,5 @@
 package at.fhtw.MTCG.model;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.List;
 
 public class Package {

@@ -74,15 +74,18 @@ public class PackageRepositoryImpl implements PackageRepository {
             statement.setInt(1, newCoins);
             statement.setString(2, token);
             statement.executeUpdate();
+            unitOfWork.commitTransaction();
         }
     }
 
     @Override
-    public void markPackageAsSold(int packageId) throws SQLException {
-        String sql = "UPDATE packages SET sold = TRUE WHERE id = ?";
+    public void markPackageAsSold(int packageId, int userId) throws SQLException {
+        String sql = "UPDATE packages SET sold = TRUE, user_id = ? WHERE id = ?";
         try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
-            statement.setInt(1, packageId);
+            statement.setInt(1, userId);  // Setze die user_id
+            statement.setInt(2, packageId);  // Setze die package_id
             statement.executeUpdate();
+            unitOfWork.commitTransaction();
         }
     }
 
@@ -105,45 +108,43 @@ public class PackageRepositoryImpl implements PackageRepository {
         }
     }
 
-    public List<Package> findPackagesByToken(String token) throws SQLException {
-        String sql = """
-        SELECT p.id, p.name, p.cards
-        FROM packages p
-        JOIN users u ON p.user_id = u.id
-        WHERE u.token = ?
-    """;
-
+    public int findUserIdByToken(String token) throws SQLException {
+        String sql = "SELECT id FROM users WHERE token = ?";
         try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
             statement.setString(1, token);
-            ResultSet resultSet = statement.executeQuery();
-
-            List<Package> packages = new ArrayList<>();
-            while (resultSet.next()) {
-                int id = resultSet.getInt("id");
-                String name = resultSet.getString("name");
-                String cardsJson = resultSet.getString("cards");
-
-                List<Card> cards = new ObjectMapper().readValue(cardsJson, new TypeReference<List<Card>>() {});
-
-                Package pkg = new Package(id, name, cards);
-
-                packages.add(pkg);
-            }
-            return packages;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public int findLatestPackageId() throws SQLException {
-        String sql = "SELECT id FROM packages ORDER BY id DESC LIMIT 1";
-        try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 return resultSet.getInt("id");
             }
         }
-        throw new IllegalStateException("No packages found");
+        throw new IllegalArgumentException("Invalid token: User not found");
+    }
+
+    public Collection<Package> findPackagesByToken(String token) throws SQLException {
+        int userId = findUserIdByToken(token);
+
+        String sql = """
+        SELECT p.id, p.name, p.cards
+        FROM packages p
+        WHERE p.user_id = ?
+    """;
+        try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
+            statement.setInt(1, userId);
+            ResultSet resultSet = statement.executeQuery();
+            Collection<Package> packages = new ArrayList<>();
+            while (resultSet.next()) {
+                String cardsJson = resultSet.getString("cards");
+                List<Card> cards = new ObjectMapper().readValue(cardsJson, new TypeReference<List<Card>>() {});
+
+                packages.add(new Package(
+                        resultSet.getInt("id"),
+                        resultSet.getString("name"),
+                        cards
+                ));
+            }
+            return packages;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error parsing cards JSON from database", e);
+        }
     }
 }
