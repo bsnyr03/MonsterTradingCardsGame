@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 public class PackageController implements RestController {
     private final PackageService packageService;
@@ -27,7 +28,7 @@ public class PackageController implements RestController {
     public Response handleRequest(Request request) {
         try {
             if (request.getMethod() == Method.POST) {
-                return handleCreatePackage(request);
+                return handlePostRequest(request);
             } else if (request.getMethod() == Method.GET) {
                 return handleGetPackages(request);
             }
@@ -38,29 +39,50 @@ public class PackageController implements RestController {
         }
     }
 
-    private Response handleCreatePackage(Request request) throws JsonProcessingException, SQLException {
+    private Response handlePostRequest(Request request) throws JsonProcessingException, SQLException {
+        Map<String, Object> requestBody = new ObjectMapper().readValue(request.getBody(), new TypeReference<>() {});
 
-        List<Card> cards = new ObjectMapper().readValue(request.getBody(), new TypeReference<List<Card>>() {});
-        if (packageService.createPackage(cards)) {
-            return new Response(HttpStatus.CREATED, ContentType.JSON, "{\"message\": \"Package created successfully\"}");
+        String packageName = (String) requestBody.get("name");
+        List<Card> cards = new ObjectMapper().convertValue(requestBody.get("cards"), new TypeReference<>() {});
+
+        if (packageName == null || packageName.isEmpty()) {
+            return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"Package name cannot be null or empty\"}");
+        }
+
+        if (cards.size() != 5) {
+            return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"A package must contain exactly 5 cards.\"}");
+        }
+
+        cards.forEach(card -> card.setId(0)); // Setze die IDs der Karten auf 0 oder ignoriere sie
+
+        if (packageService.createPackage(packageName, cards)) {
+            int packageId = packageService.getLatestPackageId();
+            String jsonResponse = new ObjectMapper().writeValueAsString(Map.of(
+                    "id", packageId,
+                    "name", packageName,
+                    "cards", cards
+            ));
+            return new Response(HttpStatus.CREATED, ContentType.JSON, jsonResponse);
         } else {
-            return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"Failed to create package\"}");
+            return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"Failed to create package.\"}");
         }
     }
 
     private Response handleGetPackages(Request request) throws SQLException, JsonProcessingException {
-
-        String token = request.getHeader("Authorization").replace("Bearer ", "");
-        if (token == null || token.isEmpty()) {
+        String token = request.getHeader("Authorization");
+        if (token == null || !token.startsWith("Bearer ")) {
             return new Response(HttpStatus.UNAUTHORIZED, ContentType.JSON, "{\"error\": \"Missing or invalid token\"}");
         }
+        token = token.replace("Bearer ", "").trim();
 
         var packages = packageService.getPackagesByToken(token);
+
         if (packages.isEmpty()) {
             return new Response(HttpStatus.NOT_FOUND, ContentType.JSON, "{\"error\": \"No packages found\"}");
         }
 
         String jsonResponse = new ObjectMapper().writeValueAsString(packages);
+
         return new Response(HttpStatus.OK, ContentType.JSON, jsonResponse);
     }
 }

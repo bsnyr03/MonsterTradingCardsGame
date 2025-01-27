@@ -1,14 +1,14 @@
 package at.fhtw.MTCG.service;
 
 import at.fhtw.MTCG.model.Card;
+import at.fhtw.MTCG.model.Package;
 import at.fhtw.MTCG.persistence.repository.PackageRepository;
 import at.fhtw.MTCG.persistence.repository.PackageRepositoryImpl;
 import at.fhtw.MTCG.persistence.UnitOfWork;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public class PackageService {
     private final PackageRepository packageRepository;
@@ -19,7 +19,7 @@ public class PackageService {
         this.cardService = new CardService();
     }
 
-    public boolean createPackage(List<Card> cards) throws SQLException, JsonProcessingException {
+    public boolean createPackage(String packageName, List<Card> cards) throws SQLException, JsonProcessingException {
         if (cards.size() != 5) {
             throw new IllegalArgumentException("A package must contain exactly 5 cards.");
         }
@@ -28,7 +28,7 @@ public class PackageService {
             cardService.createCard(card);
         }
 
-        return packageRepository.createPackage("New Package", cards);
+        return packageRepository.createPackage(packageName, cards);
     }
 
     public List<Card> buyPackage(String token) throws SQLException {
@@ -56,7 +56,20 @@ public class PackageService {
         return cards;
     }
 
-    public Collection<Card> getPackagesByToken(String token) throws SQLException {
-        return packageRepository.findPackagesByToken(token);
+    public List<Map<String, Object>> getPackagesByToken(String token) throws SQLException {
+        var packages = packageRepository.findPackagesByToken(token);
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (var pkg : packages) {
+            Map<String, Object> packageMap = new HashMap<>();
+            packageMap.put("id", pkg.getId());
+            packageMap.put("name", pkg.getName());
+            packageMap.put("cards", pkg.getCards());
+            result.add(packageMap);
+        }
+        return result;
+    }
+    public int getLatestPackageId() throws SQLException {
+        return packageRepository.findLatestPackageId();
     }
 }

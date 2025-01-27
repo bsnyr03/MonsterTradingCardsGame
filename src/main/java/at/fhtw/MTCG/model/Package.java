@@ -1,21 +1,36 @@
 package at.fhtw.MTCG.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 
 public class Package {
+
     private int id;
+    private String packageName;
     private List<Card> cards;
 
-    public Package(List<Card> cards) {
+    public Package(int id, String packageName, List<Card> cards) {
+        this.id = id;
+        this.packageName = packageName;
         this.cards = cards;
     }
 
-    public int getId() {
-        return id;
+    public String getName() {
+        return packageName;
+    }
+
+    public void setName(String packageName) {
+        this.packageName = packageName;
     }
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public List<Card> getCards() {

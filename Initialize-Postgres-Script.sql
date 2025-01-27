@@ -40,3 +40,11 @@ CREATE TABLE packages (
                           sold BOOLEAN DEFAULT FALSE NOT NULL,
                           cards JSONB NOT NULL
 );
+
+ALTER TABLE packages ADD COLUMN user_id INTEGER REFERENCES users(id);
+
+
+/* Tabellen leeren */
+DELETE FROM users;
+DELETE FROM cards;
+DELETE FROM packages;

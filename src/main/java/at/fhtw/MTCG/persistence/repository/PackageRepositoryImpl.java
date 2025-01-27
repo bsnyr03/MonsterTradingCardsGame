@@ -1,6 +1,7 @@
 package at.fhtw.MTCG.persistence.repository;
 
 import at.fhtw.MTCG.model.Card;
+import at.fhtw.MTCG.model.Package;
 import at.fhtw.MTCG.model.enums.CardTypeEnum;
 import at.fhtw.MTCG.model.enums.ElementTypeEnum;
 import at.fhtw.MTCG.persistence.UnitOfWork;
@@ -57,7 +58,8 @@ public class PackageRepositoryImpl implements PackageRepository {
 
             if (resultSet.next()) {
                 String cardsJson = resultSet.getString("cards");
-                return new ObjectMapper().readValue(cardsJson, new TypeReference<List<Card>>() {});
+                return new ObjectMapper().readValue(cardsJson, new TypeReference<List<Card>>() {
+                });
             }
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -103,30 +105,45 @@ public class PackageRepositoryImpl implements PackageRepository {
         }
     }
 
-    @Override
-    public Collection<Card> findPackagesByToken(String token) throws SQLException {
+    public List<Package> findPackagesByToken(String token) throws SQLException {
         String sql = """
-        SELECT p.cards
+        SELECT p.id, p.name, p.cards
         FROM packages p
-        JOIN users u ON u.token = ?
-        WHERE p.sold = FALSE
+        JOIN users u ON p.user_id = u.id
+        WHERE u.token = ?
     """;
 
         try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
             statement.setString(1, token);
             ResultSet resultSet = statement.executeQuery();
 
-            Collection<Card> allCards = new ArrayList<>();
-
+            List<Package> packages = new ArrayList<>();
             while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String name = resultSet.getString("name");
                 String cardsJson = resultSet.getString("cards");
-                List<Card> cards = new ObjectMapper().readValue(cardsJson, new TypeReference<List<Card>>() {});
-                allCards.addAll(cards);
-            }
 
-            return allCards;
+                List<Card> cards = new ObjectMapper().readValue(cardsJson, new TypeReference<List<Card>>() {});
+
+                Package pkg = new Package(id, name, cards);
+
+                packages.add(pkg);
+            }
+            return packages;
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public int findLatestPackageId() throws SQLException {
+        String sql = "SELECT id FROM packages ORDER BY id DESC LIMIT 1";
+        try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt("id");
+            }
+        }
+        throw new IllegalStateException("No packages found");
     }
 }
