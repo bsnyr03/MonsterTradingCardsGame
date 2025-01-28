@@ -84,8 +84,24 @@ public class PackageRepositoryImpl implements PackageRepository {
     public void markPackageAsSold(int packageId, int userId) throws SQLException {
         String sql = "UPDATE packages SET sold = TRUE, user_id = ? WHERE id = ?";
         try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
-            statement.setInt(1, userId);  // Setze die user_id
-            statement.setInt(2, packageId);  // Setze die package_id
+            statement.setInt(1, userId);
+            statement.setInt(2, packageId);
+            statement.executeUpdate();
+            unitOfWork.commitTransaction();
+        }
+    }
+
+    @Override
+    public void updateCardsIdAfterTransaction(int packageId, int userId) throws SQLException {
+        String sql = """
+    UPDATE cards SET user_id = ? WHERE id IN (
+        SELECT (jsonb_array_elements(cards) ->> 'id')::int
+        FROM packages
+        WHERE id = ?
+    )
+""";        try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
+            statement.setInt(1, userId);
+            statement.setInt(2, packageId);
             statement.executeUpdate();
             unitOfWork.commitTransaction();
         }

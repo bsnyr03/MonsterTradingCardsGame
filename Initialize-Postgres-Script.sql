@@ -56,10 +56,13 @@ CREATE TABLE decks (
 DELETE FROM users;
 DELETE FROM cards;
 DELETE FROM packages;
+DELETE FROM decks;
 
 /* Tabellen zurücksetzen */
+TRUNCATE TABLE users RESTART IDENTITY;
 TRUNCATE TABLE cards RESTART IDENTITY;
 TRUNCATE TABLE packages RESTART IDENTITY;
+TRUNCATE TABLE decks RESTART IDENTITY;
 
 /* Coins zurücksetzen */
 UPDATE users

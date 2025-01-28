@@ -16,4 +16,5 @@ public interface PackageRepository {
     void markPackageAsSold(int packageId, int userId) throws SQLException;
     boolean createPackage(String packageName, List<Card> cards) throws SQLException, JsonProcessingException;
     Collection<Package> findPackagesByToken(String token) throws SQLException;
+    void updateCardsIdAfterTransaction(int packageId, int userId) throws SQLException;
 }

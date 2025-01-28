@@ -57,6 +57,7 @@ public class PackageService {
 
         int userId = userRepository.findUserIdByToken(token);
         packageRepository.markPackageAsSold(packageId, userId);
+        packageRepository.updateCardsIdAfterTransaction(packageId, userId);
 
         return cards;
     }

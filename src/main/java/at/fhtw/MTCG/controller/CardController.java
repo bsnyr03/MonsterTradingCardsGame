@@ -44,9 +44,12 @@ public class CardController implements RestController {
         try {
             validateToken(request);
 
-            // Abrufen der Karten eines Benutzers basierend auf dem Token
             String token = extractTokenFromRequest(request);
             Collection<Card> userCards = cardService.getCardsByToken(token);
+
+            if (userCards.isEmpty()) {
+                return new Response(HttpStatus.NOT_FOUND, ContentType.JSON, "{\"error\": \"List is empty\"}");
+            }
 
             String json = new ObjectMapper().writeValueAsString(userCards);
             return new Response(HttpStatus.OK, ContentType.JSON, json);
@@ -62,7 +65,6 @@ public class CardController implements RestController {
             String token = extractTokenFromRequest(request);
 
             if (request.getPathParts().size() > 1 && "assign".equals(request.getPathParts().get(1))) {
-                // Zuordnung von Karten zu Benutzern
                 Card card = new ObjectMapper().readValue(request.getBody(), Card.class);
                 if (cardService.assignCardToUser(String.valueOf(card.getId()), token)) {
                     return new Response(HttpStatus.CREATED, ContentType.JSON, "{\"message\": \"Card successfully assigned to user\"}");

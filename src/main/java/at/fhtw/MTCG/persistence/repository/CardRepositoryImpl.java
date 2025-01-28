@@ -146,7 +146,6 @@ public class CardRepositoryImpl implements CardRepository {
 
         String sql = "SELECT * FROM cards WHERE id IN (" + inClause + ")";
         try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
-            // Setze die IDs dynamisch in die PreparedStatement-Parameter
             for (int i = 0; i < cardIds.size(); i++) {
                 statement.setInt(i + 1, cardIds.get(i));
             }
