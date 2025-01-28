@@ -57,7 +57,6 @@ public class PackageService {
 
         int userId = userRepository.findUserIdByToken(token);
         packageRepository.markPackageAsSold(packageId, userId);
-        packageRepository.updateCardsIdAfterTransaction(packageId, userId);
 
         return cards;
     }
@@ -74,19 +73,5 @@ public class PackageService {
             result.add(packageMap);
         }
         return result;
-    }
-
-
-    public boolean hasEnoughCoins(String token) throws SQLException {
-        int userCoins = packageRepository.getCoinsByToken(token);
-        return userCoins >= 5; // 5 Coins für den Kauf
-    }
-
-    public boolean hasAvailablePackages() throws SQLException {
-        return packageRepository.getAvailablePackageId() != -1; // -1 bedeutet kein Paket verfügbar
-    }
-
-    public boolean canUserPurchasePackage(String token) throws SQLException {
-        return hasEnoughCoins(token) && hasAvailablePackages();
     }
 }

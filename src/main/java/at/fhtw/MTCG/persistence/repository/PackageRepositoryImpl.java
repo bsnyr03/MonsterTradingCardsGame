@@ -92,22 +92,6 @@ public class PackageRepositoryImpl implements PackageRepository {
     }
 
     @Override
-    public void updateCardsIdAfterTransaction(int packageId, int userId) throws SQLException {
-        String sql = """
-    UPDATE cards SET user_id = ? WHERE id IN (
-        SELECT (jsonb_array_elements(cards) ->> 'id')::int
-        FROM packages
-        WHERE id = ?
-    )
-""";        try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
-            statement.setInt(1, userId);
-            statement.setInt(2, packageId);
-            statement.executeUpdate();
-            unitOfWork.commitTransaction();
-        }
-    }
-
-    @Override
     public boolean createPackage(String packageName, List<Card> cards) throws SQLException {
         String sql = "INSERT INTO packages (name, sold, cards) VALUES (?, FALSE, ?::jsonb)";
         try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {

@@ -27,9 +27,9 @@ public class PackageController implements RestController {
     public Response handleRequest(Request request) {
         try {
             if (request.getMethod() == Method.POST) {
-                return handlePostPackage(request); // Package erstellen
+                return handlePostPackage(request);
             } else if (request.getMethod() == Method.GET) {
-                return handleGetPackages(request); // Alle Packages abrufen
+                return handleGetPackages(request);
             }
 
             return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"Invalid request method or path\"}");
@@ -42,7 +42,8 @@ public class PackageController implements RestController {
         Map<String, Object> requestBody = new ObjectMapper().readValue(request.getBody(), Map.class);
 
         String packageName = (String) requestBody.get("name");
-        List<Card> cards = new ObjectMapper().convertValue(requestBody.get("cards"), new TypeReference<List<Card>>() {});
+        List<Card> cards = new ObjectMapper().convertValue(requestBody.get("cards"), new TypeReference<>() {
+        });
 
         if (packageName == null || packageName.isEmpty()) {
             return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"Package name cannot be null or empty\"}");
@@ -53,7 +54,6 @@ public class PackageController implements RestController {
         }
 
         if (packageService.createPackage(packageName, cards)) {
-            // Erfolgreiche Antwort mit dem Paketnamen
             String successMessage = String.format("{\"message\": \"Package '%s' was successfully created.\"}", packageName);
             return new Response(HttpStatus.CREATED, ContentType.JSON, successMessage);
         } else {

@@ -64,6 +64,12 @@ TRUNCATE TABLE cards RESTART IDENTITY;
 TRUNCATE TABLE packages RESTART IDENTITY;
 TRUNCATE TABLE decks RESTART IDENTITY;
 
+/* Sequenzen zurücksetzen */
+ALTER SEQUENCE cards_id_seq RESTART WITH 1;
+ALTER SEQUENCE packages_id_seq RESTART WITH 1;
+ALTER SEQUENCE decks_id_seq RESTART WITH 1;
+ALTER SEQUENCE users_id_seq RESTART WITH 1;
+
 /* Coins zurücksetzen */
 UPDATE users
 SET coins = 20;
