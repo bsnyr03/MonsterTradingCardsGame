@@ -1,3 +1,5 @@
+package at.fhtw.MTCG.service;
+
 import at.fhtw.MTCG.model.*;
 import at.fhtw.MTCG.model.enums.CardTypeEnum;
 import at.fhtw.MTCG.model.enums.ElementTypeEnum;

@@ -54,4 +54,11 @@ public class UserService {
     public User findUserByUsername(String username) throws SQLException {
         return userRepository.findByUsername(username);
     }
+
+    public int getUserIdFromToken(String token) throws SQLException {
+        if (token == null || token.isEmpty()) {
+            throw new IllegalArgumentException("Token cannot be null or empty");
+        }
+        return userRepository.findUserIdByToken(token);
+    }
 }

@@ -1,109 +1,130 @@
 package at.fhtw.MTCG.model;
 
+import at.fhtw.MTCG.persistence.repository.DeckRepository;
+import at.fhtw.MTCG.persistence.repository.DeckRepositoryImpl;
+import at.fhtw.MTCG.persistence.UnitOfWork;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class Battle {
-    private final User player1;
-    private final User player2;
+    private final Deck player1Deck;
+    private final Deck player2Deck;
     private final List<String> battleLog;
+    private static final int MAX_ROUNDS = 100;
 
-    public Battle(User player1, User player2) {
-        this.player1 = player1;
-        this.player2 = player2;
+    public Battle(int player1Id, int player2Id) throws Exception {
+        DeckRepository deckRepository = new DeckRepositoryImpl(new UnitOfWork());
+
+        this.player1Deck = deckRepository.getDeckByUserId(player1Id);
+        this.player2Deck = deckRepository.getDeckByUserId(player2Id);
+
+        if (player1Deck == null || player2Deck == null) {
+            throw new IllegalArgumentException("One or both players do not have a valid deck.");
+        }
+
         this.battleLog = new ArrayList<>();
     }
 
     public String startBattle() {
-        int round = 0;
+        int roundCount = 0;
 
-        Deck deck1 = player1.getDeck();
-        Deck deck2 = player2.getDeck();
+        while (!player1Deck.getCards().isEmpty() && !player2Deck.getCards().isEmpty() && roundCount < MAX_ROUNDS) {
+            roundCount++;
+            battleLog.add("Round " + roundCount + ":");
 
-        while (!deck1.isEmpty() && !deck2.isEmpty() && round < 100) {
-            round++;
-            battleLog.add("Round " + round + ":");
+            Card card1 = drawRandomCard(player1Deck);
+            Card card2 = drawRandomCard(player2Deck);
 
-            Card card1 = deck1.drawRandomCard();
-            Card card2 = deck2.drawRandomCard();
-
-            battleLog.add(player1.getUsername() + " plays " + card1.getName());
-            battleLog.add(player2.getUsername() + " plays " + card2.getName());
+            battleLog.add("Player 1 plays: " + card1.getName());
+            battleLog.add("Player 2 plays: " + card2.getName());
 
             int result = fight(card1, card2);
 
             if (result > 0) {
-                deck1.addCard(card2);
-                battleLog.add(player1.getUsername() + " wins the round.");
+                // Player 1 wins the round
+                player1Deck.getCards().add(card2);
+                player2Deck.getCards().remove(card2);
+                battleLog.add("Player 1 wins this round.");
             } else if (result < 0) {
-                deck2.addCard(card1);
-                battleLog.add(player2.getUsername() + " wins the round.");
+                // Player 2 wins the round
+                player2Deck.getCards().add(card1);
+                player1Deck.getCards().remove(card1);
+                battleLog.add("Player 2 wins this round.");
             } else {
-                deck1.returnCard(card1);
-                deck2.returnCard(card2);
-                battleLog.add("The round is a draw.");
+                battleLog.add("This round is a draw.");
             }
         }
-        return concludeBattle(round, deck1, deck2);
+
+        return concludeBattle(roundCount);
+    }
+
+    private Card drawRandomCard(Deck deck) {
+        List<Card> cards = deck.getCards();
+        if (cards.isEmpty()) {
+            throw new IllegalStateException("Deck is empty.");
+        }
+        return cards.get((int) (Math.random() * cards.size()));
     }
 
     private int fight(Card card1, Card card2) {
-        // Spezialregeln
+        // Spezialfälle
         if ("GOBLIN".equals(card1.getType()) && "DRAGON".equals(card2.getType())) {
-            return -1; // Goblins are too afraid of Dragons to attack.
+            return -1;
         }
         if ("GOBLIN".equals(card2.getType()) && "DRAGON".equals(card1.getType())) {
-            return 1; // Goblins are too afraid of Dragons to attack.
-        }
-        if ("KRAKEN".equals(card1.getType()) && card2.isSpell()) {
-            return 1; // The Kraken is immune against spells.
-        }
-        if ("KRAKEN".equals(card2.getType()) && card1.isSpell()) {
-            return -1; // The Kraken is immune against spells.
+            return 1;
         }
         if ("WIZARD".equals(card1.getType()) && "ORK".equals(card2.getType())) {
-            return 1; // Wizzard can control Orks so they are not able to damage them.
+            return 1;
         }
         if ("WIZARD".equals(card2.getType()) && "ORK".equals(card1.getType())) {
-            return -1; // Wizzard can control Orks so they are not able to damage them.
+            return -1;
         }
         if ("KNIGHT".equals(card1.getType()) && card2.isSpell() && "WATER".equals(card2.getElement())) {
-            return -1; // The armor of Knights is so heavy that WaterSpells make them drown them instantly.
+            return -1;
         }
         if ("KNIGHT".equals(card2.getType()) && card1.isSpell() && "WATER".equals(card1.getElement())) {
-            return 1; // The armor of Knights is so heavy that WaterSpells make them drown them instantly.
+            return 1;
+        }
+        if ("KRAKEN".equals(card1.getType()) && card2.isSpell()) {
+            return 1;
+        }
+        if ("KRAKEN".equals(card2.getType()) && card1.isSpell()) {
+            return -1;
         }
         if ("FIREELF".equals(card1.getType()) && "DRAGON".equals(card2.getType())) {
-            return 1; // The FireElves know Dragons since they were little and can evade their attacks.
+            return 1;
         }
         if ("FIREELF".equals(card2.getType()) && "DRAGON".equals(card1.getType())) {
-            return -1; // The FireElves know Dragons since they were little and can evade their attacks.
+            return -1;
         }
 
+        // Effektivität berücksichtigen
         double card1Damage = card1.getDamage();
         double card2Damage = card2.getDamage();
 
         if (card1.isSpell() || card2.isSpell()) {
-            if (card1.isEffectiveAgainst(card2)){
+            if (card1.isEffectiveAgainst(card2)) {
                 card1Damage *= 2;
             } else if (card2.isEffectiveAgainst(card1)) {
                 card2Damage *= 2;
             }
         }
+
         return Double.compare(card1Damage, card2Damage);
     }
 
-    private String concludeBattle(int rounds, Deck deck1, Deck deck2) {
-        if (deck1.isEmpty() && deck2.isEmpty()) {
+    private String concludeBattle(int rounds) {
+        if (player1Deck.getCards().isEmpty() && player2Deck.getCards().isEmpty()) {
             return "The battle ended in a draw after " + rounds + " rounds.";
         }
 
-        User winner = deck1.isEmpty() ? player2 : player1;
-        return "The battle is over. The winner is " + winner.getUsername() + ".";
+        String winner = player1Deck.getCards().isEmpty() ? "Player 2" : "Player 1";
+        return "The battle is over. The winner is " + winner + ".";
     }
 
     public List<String> getBattleLog() {
-        return this.battleLog;
+        return battleLog;
     }
 }
