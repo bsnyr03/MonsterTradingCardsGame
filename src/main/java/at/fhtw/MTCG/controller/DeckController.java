@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 public class DeckController implements RestController {
     private final DeckService deckService;
@@ -44,7 +45,14 @@ public class DeckController implements RestController {
 
         Deck deck = deckService.getDeckByUserId(userId);
 
-        String jsonResponse = new ObjectMapper().writeValueAsString(deck);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonResponse = objectMapper.writeValueAsString(
+                Map.of(
+                        "userId", deck.getUserId(),
+                        "cards", deck.getCards()
+                )
+        );
+
         return new Response(HttpStatus.OK, ContentType.JSON, jsonResponse);
     }
 

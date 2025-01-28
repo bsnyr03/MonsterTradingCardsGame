@@ -27,9 +27,18 @@ public class DeckRepositoryImpl implements DeckRepository {
             String cardsJson = new ObjectMapper().writeValueAsString(deck.getCards());
             statement.setString(2, cardsJson);
 
-            return statement.executeUpdate() > 0;
+            int rowsInserted = statement.executeUpdate();
+
+            unitOfWork.commitTransaction();
+
+            return rowsInserted > 0;
+        } catch (SQLException e) {
+            unitOfWork.rollbackTransaction();
+            System.err.println("Error executing SQL: " + e.getMessage());
+            throw e;
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error converting cards to JSON", e);
+            System.err.println("Error converting cards to JSON: " + e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
