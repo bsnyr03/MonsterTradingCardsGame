@@ -1,5 +1,6 @@
 package at.fhtw.MTCG.controller;
 
+import at.fhtw.MTCG.model.Card;
 import at.fhtw.MTCG.model.Deck;
 import at.fhtw.MTCG.service.DeckService;
 import at.fhtw.httpserver.http.ContentType;
@@ -48,19 +49,53 @@ public class DeckController implements RestController {
     }
 
     private Response handlePutRequest(Request request) throws SQLException, JsonProcessingException {
-        String token = request.getHeader("Authorization").replace("Bearer ", "");
+        String token = request.getHeader("Authorization");
+        if (token == null || !token.startsWith("Bearer ")) {
+            return new Response(HttpStatus.UNAUTHORIZED, ContentType.JSON, "{\"error\": \"Missing or invalid Authorization header\"}");
+        }
+        token = token.replace("Bearer ", "");
+
         int userId = deckService.getUserIdFromToken(token);
+        if (userId <= 0) {
+            return new Response(HttpStatus.UNAUTHORIZED, ContentType.JSON, "{\"error\": \"Invalid user token\"}");
+        }
 
-        List<Integer> cardIds = new ObjectMapper().readValue(request.getBody(), new TypeReference<List<Integer>>() {});
+        List<Integer> cardIds;
+        try {
+            cardIds = new ObjectMapper().readValue(request.getBody(), new TypeReference<>() {});
+            if (cardIds == null || cardIds.size() != 4) {
+                return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"You must provide exactly 4 card IDs\"}");
+            }
+        } catch (JsonProcessingException e) {
+            return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"Invalid request body format\"}");
+        }
 
-        Deck deck = new Deck(0, userId, deckService.getCardsByIds(cardIds));
+        List<Card> cards = deckService.getCardsByIds(cardIds, userId);
+        if (cards.size() != 4) {
+            return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"Some cards are invalid or do not belong to the user\"}");
+        }
 
-        boolean isUpdated = deckService.updateDeck(userId, deck);
+        Deck existingDeck = null;
+        try {
+            existingDeck = deckService.getDeckByUserId(userId);
+        } catch (IllegalArgumentException e) {
+            System.out.println("No deck found for user. Creating a new one.");
+        }
 
-        if (isUpdated) {
-            return new Response(HttpStatus.OK, ContentType.JSON, "{\"message\": \"Deck updated successfully\"}");
+        if (existingDeck == null) {
+            Deck newDeck = new Deck(userId, cards);
+            boolean isCreated = deckService.createDeck(userId, newDeck);
+            if (!isCreated) {
+                return new Response(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.JSON, "{\"error\": \"Failed to create deck\"}");
+            }
+            return new Response(HttpStatus.CREATED, ContentType.JSON, "{\"message\": \"Deck created successfully\"}");
         } else {
-            return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, "{\"error\": \"Failed to update deck\"}");
+            existingDeck.setCards(cards);
+            boolean isUpdated = deckService.updateDeck(userId, existingDeck);
+            if (!isUpdated) {
+                return new Response(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.JSON, "{\"error\": \"Failed to update deck\"}");
+            }
+            return new Response(HttpStatus.OK, ContentType.JSON, "{\"message\": \"Deck updated successfully\"}");
         }
     }
 }

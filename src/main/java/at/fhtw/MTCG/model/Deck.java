@@ -7,8 +7,7 @@ public class Deck {
     private int userId;
     private List<Card> cards;
 
-    public Deck(int id, int userId, List<Card> cards) {
-        this.id = id;
+    public Deck(int userId, List<Card> cards) {
         this.userId = userId;
         this.cards = cards;
     }

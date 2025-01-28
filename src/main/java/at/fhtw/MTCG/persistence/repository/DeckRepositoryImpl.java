@@ -45,13 +45,12 @@ public class DeckRepositoryImpl implements DeckRepository {
                 List<Card> cards = new ObjectMapper().readValue(cardsJson, List.class);
 
                 return new Deck(
-                        resultSet.getInt("id"),
                         resultSet.getInt("user_id"),
                         cards
                 );
             }
 
-            return null; // Kein Deck gefunden
+            return null;
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Error reading cards from JSON", e);
         }
@@ -65,9 +64,14 @@ public class DeckRepositoryImpl implements DeckRepository {
             statement.setString(1, cardsJson);
             statement.setInt(2, userId);
 
-            return statement.executeUpdate() > 0;
+            int updatedRows = statement.executeUpdate();
+            unitOfWork.commitTransaction();
+            return updatedRows > 0;
+        } catch (SQLException e) {
+            unitOfWork.rollbackTransaction();
+            throw new SQLException("Error updating deck: " + e.getMessage(), e);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error converting cards to JSON", e);
+            throw new RuntimeException(e);
         }
     }
 }

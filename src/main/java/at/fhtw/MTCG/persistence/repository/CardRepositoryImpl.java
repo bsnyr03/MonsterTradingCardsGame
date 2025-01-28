@@ -140,17 +140,19 @@ public class CardRepositoryImpl implements CardRepository {
     }
 
     @Override
-    public List<Card> findCardsByIds(List<Integer> cardIds) throws SQLException {
-        StringBuilder inClause = new StringBuilder("?");
-        for (int i = 1; i < cardIds.size(); i++) {
-            inClause.append(", ?");
+    public List<Card> findCardsByIds(List<Integer> cardIds, int userId) throws SQLException {
+        if (cardIds.isEmpty()) {
+            throw new IllegalArgumentException("The card ID list is empty.");
         }
 
-        String sql = "SELECT * FROM cards WHERE id IN (" + inClause + ")";
+        String placeholders = String.join(",", cardIds.stream().map(id -> "?").toArray(String[]::new));
+        String sql = "SELECT * FROM cards WHERE id IN (" + placeholders + ") AND user_id = ?";
+
         try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
             for (int i = 0; i < cardIds.size(); i++) {
                 statement.setInt(i + 1, cardIds.get(i));
             }
+            statement.setInt(cardIds.size() + 1, userId);
 
             ResultSet resultSet = statement.executeQuery();
             List<Card> cards = new ArrayList<>();

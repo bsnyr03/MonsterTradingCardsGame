@@ -39,7 +39,12 @@ public class DeckService {
         return userRepository.findUserIdByToken(token);
     }
 
-    public List<Card> getCardsByIds(List<Integer> cardIds) throws SQLException {
-        return cardRepository.findCardsByIds(cardIds);
+    public List<Card> getCardsByIds(List<Integer> cardIds, int userId) throws SQLException {
+        List<Card> cards = cardRepository.findCardsByIds(cardIds, userId);
+
+        if (cards.size() != cardIds.size()) {
+            throw new IllegalArgumentException("Some cards do not exist or do not belong to the user.");
+        }
+        return cards;
     }
 }
