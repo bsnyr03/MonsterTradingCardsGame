@@ -161,4 +161,19 @@ public class UserRepositoryImpl implements UserRepository {
         }
         throw new IllegalArgumentException("Invalid token: User not found");
     }
+    public boolean updateELOAndGamesPlayed(int userId, int eloChange) throws SQLException{
+        String sql = "UPDATE users SET elo = elo + ?, games_played = games_played + 1 WHERE id = ?";
+        try {
+            try (PreparedStatement statement = this.unitOfWork.prepareStatement(sql)) {
+                statement.setInt(1, eloChange);
+                statement.setInt(2, userId);
+                boolean result = statement.executeUpdate() > 0;
+                unitOfWork.commitTransaction();
+                return result;
+            }
+        } catch (SQLException e) {
+            unitOfWork.rollbackTransaction();
+            throw e;
+        }
+    }
 }

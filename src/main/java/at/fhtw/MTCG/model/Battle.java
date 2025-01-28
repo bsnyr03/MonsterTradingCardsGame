@@ -3,7 +3,10 @@ package at.fhtw.MTCG.model;
 import at.fhtw.MTCG.persistence.repository.DeckRepository;
 import at.fhtw.MTCG.persistence.repository.DeckRepositoryImpl;
 import at.fhtw.MTCG.persistence.UnitOfWork;
+import at.fhtw.MTCG.persistence.repository.UserRepository;
+import at.fhtw.MTCG.persistence.repository.UserRepositoryImpl;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +29,7 @@ public class Battle {
         this.battleLog = new ArrayList<>();
     }
 
-    public String startBattle() {
+    public String startBattle() throws SQLException {
         int roundCount = 0;
 
         while (!player1Deck.getCards().isEmpty() && !player2Deck.getCards().isEmpty() && roundCount < MAX_ROUNDS) {
@@ -55,7 +58,6 @@ public class Battle {
                 battleLog.add("This round is a draw.");
             }
         }
-
         return concludeBattle(roundCount);
     }
 
@@ -115,13 +117,27 @@ public class Battle {
         return Double.compare(card1Damage, card2Damage);
     }
 
-    private String concludeBattle(int rounds) {
+    private String concludeBattle(int rounds) throws SQLException {
+        String winner;
+        int player1ELOChange = 0;
+        int player2ELOChange = 0;
         if (player1Deck.getCards().isEmpty() && player2Deck.getCards().isEmpty()) {
-            return "The battle ended in a draw after " + rounds + " rounds.";
+            winner = "The battle ended in a draw after " + rounds + " rounds.";
+        } else if (player1Deck.getCards().isEmpty()) {
+            winner = "The battle is over. The winner is Player 2.";
+            player1ELOChange = -5;
+            player2ELOChange = +3;
+        } else {
+            winner = "The battle is over. The winner is Player 1.";
+            player1ELOChange = +3;
+            player2ELOChange = -5;
         }
 
-        String winner = player1Deck.getCards().isEmpty() ? "Player 2" : "Player 1";
-        return "The battle is over. The winner is " + winner + ".";
+        // Update ELO and games played
+        UserRepository userRepository = new UserRepositoryImpl(new UnitOfWork());
+        userRepository.updateELOAndGamesPlayed(player1Deck.getUserId(), player1ELOChange);
+        userRepository.updateELOAndGamesPlayed(player2Deck.getUserId(), player2ELOChange);
+        return winner;
     }
 
     public List<String> getBattleLog() {

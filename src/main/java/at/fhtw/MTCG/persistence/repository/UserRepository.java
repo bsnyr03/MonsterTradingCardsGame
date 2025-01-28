@@ -13,4 +13,5 @@ public interface UserRepository {
     void updateTocken(String username, String token) throws SQLException;
     void updateCoins(int id, int coins) throws SQLException;
     int findUserIdByToken(String token) throws SQLException;
+    boolean updateELOAndGamesPlayed(int userId, int eloChange) throws SQLException;
 }

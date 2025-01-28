@@ -45,6 +45,9 @@ ALTER TABLE packages ADD COLUMN user_id INTEGER REFERENCES users(id);
 
 ALTER TABLE users ADD COLUMN coins INTEGER DEFAULT 20 NOT NULL;
 
+ALTER TABLE users ADD COLUMN elo INTEGER DEFAULT 1000;
+ALTER TABLE users ADD COLUMN games_played INTEGER DEFAULT 0;
+
 CREATE TABLE decks (
                        id SERIAL PRIMARY KEY,
                        user_id INTEGER NOT NULL REFERENCES users(id),
