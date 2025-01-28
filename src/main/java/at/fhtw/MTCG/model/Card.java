@@ -2,10 +2,10 @@ package at.fhtw.MTCG.model;
 
 import at.fhtw.MTCG.model.enums.CardTypeEnum;
 import at.fhtw.MTCG.model.enums.ElementTypeEnum;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.lang.annotation.ElementType;
 
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Card {
     private int id;
     private String name;
