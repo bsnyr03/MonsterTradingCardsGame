@@ -13,6 +13,12 @@ public class Deck {
         this.cards = cards;
     }
 
+    public Deck(int id, int userId, List<Card> cards) {
+        this.id = id;
+        this.userId = userId;
+        this.cards = cards;
+    }
+
     public Deck(List<Card>cards){
         this.cards = cards;
     }
