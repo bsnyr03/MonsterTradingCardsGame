@@ -102,15 +102,22 @@ public class Battle {
             return -1;
         }
 
-        // Effektivität berücksichtigen
         double card1Damage = card1.getDamage();
         double card2Damage = card2.getDamage();
 
         if (card1.isSpell() || card2.isSpell()) {
+            // Effektivität von card1 gegen card2
             if (card1.isEffectiveAgainst(card2)) {
                 card1Damage *= 2;
-            } else if (card2.isEffectiveAgainst(card1)) {
+            } else if (card1.isIneffectiveAgainst(card2)) {
+                card1Damage /= 2;
+            }
+
+            // Effektivität von card2 gegen card1
+            if (card2.isEffectiveAgainst(card1)) {
                 card2Damage *= 2;
+            } else if (card2.isIneffectiveAgainst(card1)) {
+                card2Damage /= 2;
             }
         }
 

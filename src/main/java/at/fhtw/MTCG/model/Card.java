@@ -3,7 +3,6 @@ package at.fhtw.MTCG.model;
 import at.fhtw.MTCG.model.enums.CardTypeEnum;
 import at.fhtw.MTCG.model.enums.ElementTypeEnum;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.lang.annotation.ElementType;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Card {
@@ -88,7 +87,29 @@ public class Card {
     }
 
     public boolean isEffectiveAgainst(Card other) {
-        return this.element.calculateEffectiveness(other.getElement()) > 1.0;
+        if (this.element == ElementTypeEnum.WATER && other.element == ElementTypeEnum.FIRE) {
+            return true;
+        }
+        if (this.element == ElementTypeEnum.FIRE && other.element == ElementTypeEnum.NORMAL) {
+            return true;
+        }
+        if (this.element == ElementTypeEnum.NORMAL && other.element == ElementTypeEnum.WATER) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isIneffectiveAgainst(Card other) {
+        if (this.element == ElementTypeEnum.FIRE && other.element == ElementTypeEnum.WATER) {
+            return true;
+        }
+        if (this.element == ElementTypeEnum.NORMAL && other.element == ElementTypeEnum.FIRE) {
+            return true;
+        }
+        if (this.element == ElementTypeEnum.WATER && other.element == ElementTypeEnum.NORMAL) {
+            return true;
+        }
+        return false;
     }
 
 }
