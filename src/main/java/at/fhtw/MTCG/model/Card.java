@@ -76,11 +76,19 @@ public class Card {
 
     public double calculateDamageAgainst(Card opponentCard) {
         if (this.type == CardTypeEnum.MONSTER && opponentCard.type == CardTypeEnum.MONSTER) {
-            return this.damage; // Elemente beeinflussen Monsterkämpfe nicht
+            return this.damage;
         }
 
-        // Berechnung basierend auf Effektivität
         double effectiveness = this.element.calculateEffectiveness(opponentCard.element);
         return this.damage * effectiveness;
     }
+
+    public boolean isSpell() {
+        return "SPELL".equalsIgnoreCase(String.valueOf(this.type));
+    }
+
+    public boolean isEffectiveAgainst(Card other) {
+        return this.element.calculateEffectiveness(other.getElement()) > 1.0;
+    }
+
 }

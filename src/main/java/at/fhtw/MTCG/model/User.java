@@ -9,6 +9,7 @@ public class User {
     private String password;
     private String token;
     private int coins = 20;
+    private Deck deck;
 
 
     public User() {
@@ -58,5 +59,13 @@ public class User {
 
     public void setCoins(int coins) {
         this.coins = coins;
+    }
+
+    public Deck getDeck() {
+        return deck;
+    }
+
+    public void setDeck(Deck deck) {
+        this.deck = deck;
     }
 }
