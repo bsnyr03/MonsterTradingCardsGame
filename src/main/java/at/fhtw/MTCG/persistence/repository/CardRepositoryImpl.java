@@ -168,5 +168,16 @@ public class CardRepositoryImpl implements CardRepository {
             return cards;
         }
     }
+    @Override
+    public boolean updateCardUser(int cardId, int newUserId) throws SQLException {
+        String sql = "UPDATE cards SET user_id = ? WHERE id = ?";
+        try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
+            statement.setInt(1, newUserId);
+            statement.setInt(2, cardId);
+            boolean result = statement.executeUpdate() > 0;
+            unitOfWork.commitTransaction();
+            return result;
+        }
+    }
 }
 

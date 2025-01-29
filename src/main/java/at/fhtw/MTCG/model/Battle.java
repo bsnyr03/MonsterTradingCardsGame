@@ -1,10 +1,7 @@
 package at.fhtw.MTCG.model;
 
-import at.fhtw.MTCG.persistence.repository.DeckRepository;
-import at.fhtw.MTCG.persistence.repository.DeckRepositoryImpl;
+import at.fhtw.MTCG.persistence.repository.*;
 import at.fhtw.MTCG.persistence.UnitOfWork;
-import at.fhtw.MTCG.persistence.repository.UserRepository;
-import at.fhtw.MTCG.persistence.repository.UserRepositoryImpl;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -31,6 +28,8 @@ public class Battle {
 
     public String startBattle() throws SQLException {
         int roundCount = 0;
+        DeckRepository deckRepository = new DeckRepositoryImpl(new UnitOfWork());
+        UserRepository userRepository = new UserRepositoryImpl(new UnitOfWork());
 
         while (!player1Deck.getCards().isEmpty() && !player2Deck.getCards().isEmpty() && roundCount < MAX_ROUNDS) {
             roundCount++;
@@ -45,23 +44,23 @@ public class Battle {
             int result = fight(card1, card2);
 
             if (result > 0) {
-                // Player 1 wins the round
+                // Player 1 gewinnt -> Card2 übernehmen
                 player1Deck.getCards().add(card2);
                 player2Deck.getCards().remove(card2);
+                updateCardOwnership(card2.getId(), player1Deck.getUserId());
                 battleLog.add("Player 1 wins this round.");
             } else if (result < 0) {
-                // Player 2 wins the round
+                // Player 2 gewinnt -> Card1 übernehmen
                 player2Deck.getCards().add(card1);
                 player1Deck.getCards().remove(card1);
+                updateCardOwnership(card1.getId(), player2Deck.getUserId());
                 battleLog.add("Player 2 wins this round.");
             } else {
                 battleLog.add("This round is a draw.");
             }
 
-            DeckRepository deckRepository = new DeckRepositoryImpl(new UnitOfWork());
             deckRepository.updateDeck(player1Deck.getUserId(), player1Deck);
             deckRepository.updateDeck(player2Deck.getUserId(), player2Deck);
-
         }
         return concludeBattle(roundCount);
     }
@@ -154,4 +153,15 @@ public class Battle {
     public List<String> getBattleLog() {
         return battleLog;
     }
+
+    private void updateCardOwnership(int cardId, int newUserId) throws SQLException {
+        CardRepository cardRepository = new CardRepositoryImpl(new UnitOfWork());
+        boolean updated = cardRepository.updateCardUser(cardId, newUserId);
+
+        if (!updated) {
+            battleLog.add("Error: Failed to update ownership of card with ID " + cardId);
+            throw new SQLException("Failed to update card ownership for card ID: " + cardId);
+        }
+    }
+
 }

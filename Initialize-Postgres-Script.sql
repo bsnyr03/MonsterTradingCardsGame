@@ -76,3 +76,17 @@ ALTER SEQUENCE users_id_seq RESTART WITH 1;
 /* Coins zurücksetzen */
 UPDATE users
 SET coins = 20;
+
+/* ELO zurücksetzen */
+UPDATE users
+SET elo = 1000;
+
+/* Games Played zurücksetzen */
+UPDATE users
+SET games_played = 0;
+
+/* Testing */
+SELECT * FROM users;
+SELECT * FROM cards;
+SELECT * FROM packages;
+SELECT * FROM decks;
