@@ -131,8 +131,12 @@ public class Battle {
         String winner;
         int player1ELOChange = 0;
         int player2ELOChange = 0;
+        boolean draw = false;
+        boolean player1Won = false;
+
         if (player1Deck.getCards().isEmpty() && player2Deck.getCards().isEmpty()) {
             winner = "The battle ended in a draw after " + rounds + " rounds.";
+            draw = true;
         } else if (player1Deck.getCards().isEmpty()) {
             winner = "The battle is over. The winner is Player 2.";
             player1ELOChange = -5;
@@ -141,12 +145,15 @@ public class Battle {
             winner = "The battle is over. The winner is Player 1.";
             player1ELOChange = +3;
             player2ELOChange = -5;
+            player1Won = true;
         }
 
         // Update ELO and games played
         UserRepository userRepository = new UserRepositoryImpl(new UnitOfWork());
         userRepository.updateELOAndGamesPlayed(player1Deck.getUserId(), player1ELOChange);
         userRepository.updateELOAndGamesPlayed(player2Deck.getUserId(), player2ELOChange);
+        userRepository.updateWinLossRecord(player1Deck.getUserId(), player1Won, draw);
+        userRepository.updateWinLossRecord(player2Deck.getUserId(), !player1Won && !draw, draw);
         return winner;
     }
 

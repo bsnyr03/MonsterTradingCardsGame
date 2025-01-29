@@ -176,4 +176,24 @@ public class UserRepositoryImpl implements UserRepository {
             throw e;
         }
     }
+    @Override
+    public void updateWinLossRecord(int userId, boolean won, boolean draw) throws SQLException {
+        String sql;
+        if (won) {
+            sql = "UPDATE users SET wins = wins + 1 WHERE id = ?";
+        } else if (draw) {
+            sql = "UPDATE users SET draws = draws + 1 WHERE id = ?";
+        } else {
+            sql = "UPDATE users SET losses = losses + 1 WHERE id = ?";
+        }
+
+        try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
+            statement.setInt(1, userId);
+            statement.executeUpdate();
+            unitOfWork.commitTransaction();
+        } catch (SQLException e) {
+            unitOfWork.rollbackTransaction();
+            throw e;
+        }
+    }
 }
