@@ -12,10 +12,14 @@ import at.fhtw.MTCG.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jetbrains.annotations.NotNull;
 
+import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 public class UserController implements RestController {
@@ -93,10 +97,18 @@ public class UserController implements RestController {
 
     private Response handleUserRequestGET(Request request) {
         try {
-
-
             Collection<User> users = userService.findAllUsers();
-            String json = new ObjectMapper().writeValueAsString(users);
+
+            @NotNull List<Map<@NotNull String, ? extends Serializable>> filteredUsers = users.stream()
+                    .map(user -> Map.of(
+                            "id", user.getId(),
+                            "username", user.getUsername(),
+                            "password", user.getPassword(),
+                            "token", user.getToken()
+                    ))
+                    .collect(Collectors.toList());
+
+            String json = new ObjectMapper().writeValueAsString(filteredUsers);
 
             return new Response(HttpStatus.OK, ContentType.JSON, json);
         } catch (IllegalArgumentException e) {
@@ -107,23 +119,6 @@ public class UserController implements RestController {
             return new Response(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.JSON, "{\"error\": \"Error serializing data to JSON\"}");
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    private void validateToken(Request request) throws IllegalArgumentException, SQLException {
-        String authorizationHeader = request.getHeader("Authorization");
-
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            throw new IllegalArgumentException("Missing or invalid Authorization header");
-        }
-
-        String token = authorizationHeader.substring(7);
-
-        // Überprüfe den Token in der Datenbank
-        boolean isValid = userService.validateToken(token);
-
-        if (!isValid) {
-            throw new IllegalArgumentException("Invalid or expired token");
         }
     }
 }
