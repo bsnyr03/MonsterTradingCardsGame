@@ -7,6 +7,11 @@ package "Model" {
         - String password
         - String token
         - int coins
+        - int elo
+        - int gamesPlayed
+        - int gamesWon
+        - int gamesLost
+        - int gamesDrawn
     }
 
     class Card {
@@ -15,16 +20,23 @@ package "Model" {
         - double damage
         - ElementTypeEnum element
         - CardTypeEnum type
+        - MonsterTypeEnum mtype
     }
 
     class Package {
         - int id
+        - String packageName
         - List<Card> cards
     }
 
     class Deck {
-        - String userId
+        - int id
+        - int userId
         - List<Card> cards
+    }
+
+    class Battle {
+            - where the BattleLogic is implemented
     }
 
     enum ElementTypeEnum {
@@ -36,6 +48,17 @@ package "Model" {
     enum CardTypeEnum {
         MONSTER
         SPELL
+    }
+
+    enum MonsterTypeEnum {
+        GOBLIN
+        DRAGON
+        WIZARD
+        ORK
+        KNIGHT
+        KRAKEN
+        FIREELF
+        NOMONSTER
     }
 }
 
@@ -55,83 +78,64 @@ package "Controller" {
     class BattleController {
         + handleRequest(Request): Response
     }
+
+    class DeckController {
+        + handleRequest(Request): Response
+    }
+
+    class ScoreboardController {
+        + handleRequest(Request): Response
+    }
+
+    class SessionController {
+        + handleRequest(Request): Response
+    }
+
+    class StatsController {
+        + handleRequest(Request): Response
+    }
+
+    class TransactionsController {
+        + handleRequest(Request): Response
+    }
 }
 
 package "Service" {
     class UserService {
-        + registerUser(User): boolean
-        + loginUser(String, String): String
-        + getUserByToken(String): User
     }
 
     class CardService {
-        + save(Card): boolean
-        + getAllCards(): List<Card>
     }
 
     class PackageService {
-        + createPackage(Package): boolean
-        + acquirePackage(String): List<Card>
     }
 
-    class BattleService {
-        + startBattle(String, String): String
+    class DeckService {
     }
 }
 
 package "Persistence" {
     class UserRepository {
-        + findByName(String): User
-        + saveUser(User): boolean
-        + updateToken(String, String): void
     }
 
     class CardRepository {
-        + save(Card): boolean
-        + findAll(): List<Card>
     }
 
     class PackageRepository {
-        + save(Package): boolean
-        + getNextPackage(): Package
     }
 
     class DeckRepository {
-        + saveDeck(Deck): boolean
-        + getDeckByUser(String): Deck
+
     }
 }
 
 package "HTTP" {
     class Request {
-        - Method method
-        - String body
-        - Map<String, String> headers
     }
-
     class Response {
-        - int statusCode
-        - String body
-        - String contentType
     }
-
     enum Method {
-        GET
-        POST
-        PUT
-        DELETE
     }
 }
-
-UserController --> UserService
-CardController --> CardService
-PackageController --> PackageService
-BattleController --> BattleService
-
-UserService --> UserRepository
-CardService --> CardRepository
-PackageService --> PackageRepository
-BattleService --> DeckRepository
-DeckRepository --> CardRepository
 
 @enduml
