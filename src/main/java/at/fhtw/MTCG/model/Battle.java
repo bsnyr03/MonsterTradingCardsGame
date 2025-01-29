@@ -73,7 +73,7 @@ public class Battle {
         return concludeBattle(roundCount);
     }
 
-    private Card drawRandomCard(Deck deck) {
+    public Card drawRandomCard(Deck deck) {
         List<Card> cards = deck.getCards();
         if (cards.isEmpty()) {
             throw new IllegalStateException("Deck is empty.");
@@ -81,7 +81,7 @@ public class Battle {
         return cards.get((int) (Math.random() * cards.size()));
     }
 
-    private int fight(Card card1, Card card2) {
+    int fight(Card card1, Card card2) {
         if (card1.getMonsterType() == MonsterTypeEnum.GOBLIN && card2.getMonsterType() == MonsterTypeEnum.DRAGON) {
             return -1;
         }
@@ -132,7 +132,7 @@ public class Battle {
         return Double.compare(card1Damage, card2Damage);
     }
 
-    private String concludeBattle(int rounds) throws SQLException {
+    public String concludeBattle(int rounds) throws SQLException {
         String winner;
         int player1ELOChange = 0;
         int player2ELOChange = 0;
@@ -162,7 +162,7 @@ public class Battle {
         return winner;
     }
 
-    private void rewardWinnerWithCoins(int userId) throws SQLException {
+    public void rewardWinnerWithCoins(int userId) throws SQLException {
         userRepository.updateCoinsForExtraPrice(userId, Battle.WINNER_BONUS_COINS);
         battleLog.add("Winner awarded with " + Battle.WINNER_BONUS_COINS + " bonus coins!");
     }
@@ -171,7 +171,7 @@ public class Battle {
         return battleLog;
     }
 
-    private void updateCardOwnership(int cardId, int newUserId) throws SQLException {
+    public void updateCardOwnership(int cardId, int newUserId) throws SQLException {
         boolean updated = cardRepository.updateCardUser(cardId, newUserId);
         if (!updated) {
             battleLog.add("Error: Failed to update ownership of card with ID " + cardId);
