@@ -12,18 +12,18 @@ public class Card {
     private double damage;
     private ElementTypeEnum element;
     private CardTypeEnum type;
-    private MonsterTypeEnum monsterType;
+    private MonsterTypeEnum mtype;
 
 
     public Card(){}
 
-    public Card(int id, String name, double damage, ElementTypeEnum element, CardTypeEnum type, MonsterTypeEnum monsterType){
+    public Card(int id, String name, double damage, ElementTypeEnum element, CardTypeEnum type, MonsterTypeEnum mtype){
         this.id = id;
         this.name = name;
         this.damage = damage;
         this.element = element;
         this.type = type;
-        this.monsterType = monsterType;
+        this.mtype = mtype;
     }
 
     public int getId() {
@@ -59,11 +59,11 @@ public class Card {
     }
 
     public MonsterTypeEnum getMonsterType() {
-        return monsterType;
+        return mtype;
     }
 
-    public void setMonsterType(MonsterTypeEnum monsterType) {
-        this.monsterType = monsterType;
+    public void setMonsterType(MonsterTypeEnum mtype) {
+        this.mtype = mtype;
     }
 
     public CardTypeEnum getType() {
@@ -82,7 +82,7 @@ public class Card {
                 ", damage=" + damage +
                 ", element=" + element +
                 ", type=" + type +
-                ", monsterType=" + monsterType +
+                ", mtype=" + mtype +
                 '}';
     }
 

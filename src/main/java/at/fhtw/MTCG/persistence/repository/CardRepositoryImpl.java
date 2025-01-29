@@ -35,7 +35,7 @@ public class CardRepositoryImpl implements CardRepository {
                         resultSet.getDouble("damage"),
                         ElementTypeEnum.valueOf(resultSet.getString("element")),
                         CardTypeEnum.valueOf(resultSet.getString("type")),
-                        MonsterTypeEnum.valueOf(resultSet.getString("monsterType"))
+                        MonsterTypeEnum.valueOf(resultSet.getString("mtype"))
                 );
             }
         }
@@ -56,7 +56,7 @@ public class CardRepositoryImpl implements CardRepository {
                         resultSet.getDouble("damage"),
                         ElementTypeEnum.valueOf(resultSet.getString("element")),
                         CardTypeEnum.valueOf(resultSet.getString("type")),
-                        MonsterTypeEnum.valueOf(resultSet.getString("monsterType"))
+                        MonsterTypeEnum.valueOf(resultSet.getString("mtype"))
                 ));
             }
             return cards;
@@ -65,7 +65,7 @@ public class CardRepositoryImpl implements CardRepository {
 
     @Override
     public boolean save(Card card) throws SQLException {
-        String sql = "INSERT INTO cards (name, damage, element, type, monster_type) VALUES (?, ?, ?, ?, ?) RETURNING id";
+        String sql = "INSERT INTO cards (name, damage, element, type, mtype) VALUES (?, ?, ?, ?, ?) RETURNING id";
         try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
             statement.setString(1, card.getName());
             statement.setDouble(2, card.getDamage());
@@ -121,7 +121,7 @@ public class CardRepositoryImpl implements CardRepository {
     @Override
     public Collection<Card> findCardsByToken(String token) throws SQLException {
         String sql = """
-        SELECT c.id, c.name, c.damage, c.element, c.type, c.monster_type
+        SELECT c.id, c.name, c.damage, c.element, c.type, c.mtype
         FROM cards c
         JOIN users u ON c.user_id = u.id
         WHERE u.token = ?
@@ -137,7 +137,7 @@ public class CardRepositoryImpl implements CardRepository {
                         resultSet.getDouble("damage"),
                         ElementTypeEnum.valueOf(resultSet.getString("element")),
                         CardTypeEnum.valueOf(resultSet.getString("type")),
-                        MonsterTypeEnum.valueOf(resultSet.getString("monster_type"))
+                        MonsterTypeEnum.valueOf(resultSet.getString("mtype"))
                 ));
             }
             return cards;
@@ -168,7 +168,7 @@ public class CardRepositoryImpl implements CardRepository {
                         resultSet.getDouble("damage"),
                         ElementTypeEnum.valueOf(resultSet.getString("element")),
                         CardTypeEnum.valueOf(resultSet.getString("type")),
-                        MonsterTypeEnum.valueOf(resultSet.getString("monster_type"))
+                        MonsterTypeEnum.valueOf(resultSet.getString("mtype"))
                 ));
             }
             return cards;
