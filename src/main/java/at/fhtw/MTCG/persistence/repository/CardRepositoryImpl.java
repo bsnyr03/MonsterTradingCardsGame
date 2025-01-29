@@ -168,7 +168,7 @@ public class CardRepositoryImpl implements CardRepository {
                         resultSet.getDouble("damage"),
                         ElementTypeEnum.valueOf(resultSet.getString("element")),
                         CardTypeEnum.valueOf(resultSet.getString("type")),
-                        MonsterTypeEnum.valueOf(resultSet.getString("monsterType"))
+                        MonsterTypeEnum.valueOf(resultSet.getString("monster_type"))
                 ));
             }
             return cards;
