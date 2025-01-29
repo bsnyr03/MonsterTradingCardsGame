@@ -7,5 +7,6 @@ public enum MonsterTypeEnum {
     ORK,
     KNIGHT,
     KRAKEN,
-    FIREELF
+    FIREELF,
+    NOMONSTER
 }

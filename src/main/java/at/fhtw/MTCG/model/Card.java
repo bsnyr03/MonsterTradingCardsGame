@@ -58,6 +58,14 @@ public class Card {
         this.element = element;
     }
 
+    public MonsterTypeEnum getMonsterType() {
+        return monsterType;
+    }
+
+    public void setMonsterType(MonsterTypeEnum monsterType) {
+        this.monsterType = monsterType;
+    }
+
     public CardTypeEnum getType() {
         return type;
     }
@@ -74,6 +82,7 @@ public class Card {
                 ", damage=" + damage +
                 ", element=" + element +
                 ", type=" + type +
+                ", monsterType=" + monsterType +
                 '}';
     }
 
@@ -114,9 +123,5 @@ public class Card {
             return true;
         }
         return false;
-    }
-
-    public MonsterTypeEnum getMonsterType() {
-        return monsterType;
     }
 }

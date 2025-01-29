@@ -35,7 +35,7 @@ public class CardRepositoryImpl implements CardRepository {
                         resultSet.getDouble("damage"),
                         ElementTypeEnum.valueOf(resultSet.getString("element")),
                         CardTypeEnum.valueOf(resultSet.getString("type")),
-                        MonsterTypeEnum.valueOf(resultSet.getString("monster_type"))
+                        MonsterTypeEnum.valueOf(resultSet.getString("monsterType"))
                 );
             }
         }
@@ -56,7 +56,7 @@ public class CardRepositoryImpl implements CardRepository {
                         resultSet.getDouble("damage"),
                         ElementTypeEnum.valueOf(resultSet.getString("element")),
                         CardTypeEnum.valueOf(resultSet.getString("type")),
-                        MonsterTypeEnum.valueOf(resultSet.getString("monster_type"))
+                        MonsterTypeEnum.valueOf(resultSet.getString("monsterType"))
                 ));
             }
             return cards;
@@ -121,7 +121,7 @@ public class CardRepositoryImpl implements CardRepository {
     @Override
     public Collection<Card> findCardsByToken(String token) throws SQLException {
         String sql = """
-        SELECT c.id, c.name, c.damage, c.element, c.type
+        SELECT c.id, c.name, c.damage, c.element, c.type, c.monster_type
         FROM cards c
         JOIN users u ON c.user_id = u.id
         WHERE u.token = ?
@@ -137,7 +137,7 @@ public class CardRepositoryImpl implements CardRepository {
                         resultSet.getDouble("damage"),
                         ElementTypeEnum.valueOf(resultSet.getString("element")),
                         CardTypeEnum.valueOf(resultSet.getString("type")),
-                        MonsterTypeEnum.valueOf(resultSet.getString("monster_type"))
+                        MonsterTypeEnum.valueOf(resultSet.getString("monsterType"))
                 ));
             }
             return cards;
@@ -168,7 +168,7 @@ public class CardRepositoryImpl implements CardRepository {
                         resultSet.getDouble("damage"),
                         ElementTypeEnum.valueOf(resultSet.getString("element")),
                         CardTypeEnum.valueOf(resultSet.getString("type")),
-                        MonsterTypeEnum.valueOf(resultSet.getString("monster_type"))
+                        MonsterTypeEnum.valueOf(resultSet.getString("monsterType"))
                 ));
             }
             return cards;

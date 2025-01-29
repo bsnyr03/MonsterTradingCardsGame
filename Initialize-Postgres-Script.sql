@@ -27,12 +27,13 @@ CREATE TABLE cards
     name    VARCHAR(255)     NOT NULL,
     damage  DOUBLE PRECISION NOT NULL,
     element VARCHAR(50)      NOT NULL,
-    type    VARCHAR(50)      NOT NULL
+    type    VARCHAR(50)      NOT NULL,
+    monsterType VARCHAR(50) NOT NULL
 );
 
 /* Add some test cards */
-INSERT INTO cards (name, damage, element, type) VALUES ('FireGoblin', '50', 'FIRE', 'MONSTER');
-INSERT INTO cards (name, damage, element, type) VALUES ('WaterSpell', '40', 'WATER', 'SPELL');
+INSERT INTO cards (name, damage, element, type, monsterType) VALUES ('FireGoblin', '50', 'FIRE', 'MONSTER', 'GOBLIN');
+INSERT INTO cards (name, damage, element, type, monsterType) VALUES ('WaterSpell', '40', 'WATER', 'SPELL', 'NOMONSTER');
 
 /* Create Table packages */
 CREATE TABLE packages (
