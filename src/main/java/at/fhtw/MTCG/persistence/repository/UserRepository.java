@@ -3,6 +3,7 @@ import at.fhtw.MTCG.model.User;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 
 public interface UserRepository {
     User findByUsername(String username) throws SQLException;
@@ -15,4 +16,6 @@ public interface UserRepository {
     int findUserIdByToken(String token) throws SQLException;
     boolean updateELOAndGamesPlayed(int userId, int eloChange) throws SQLException;
     void updateWinLossRecord(int userId, boolean won, boolean draw) throws SQLException;
+    User getUserStatsByToken(String token) throws SQLException;
+    List<User> getScoreboard() throws SQLException;
 }

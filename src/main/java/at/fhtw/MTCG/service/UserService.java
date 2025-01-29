@@ -6,6 +6,7 @@ import at.fhtw.MTCG.persistence.repository.UserRepositoryImpl;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 
 public class UserService {
     private final UserRepository userRepository;
@@ -61,4 +62,13 @@ public class UserService {
         }
         return userRepository.findUserIdByToken(token);
     }
+
+    public User getUserStatsByToken(String token) throws SQLException {
+        return userRepository.getUserStatsByToken(token);
+    }
+
+    public List<User> getScoreboard() throws SQLException {
+        return userRepository.getScoreboard();
+    }
+
 }

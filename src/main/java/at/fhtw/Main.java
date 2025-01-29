@@ -27,6 +27,8 @@ public class Main {
         router.addService("/sessions", new SessionsController());
         router.addService("/decks", new DeckController());
         router.addService("/battles", new BattleController());
+        router.addService("/scoreboard", new ScoreboardController());
+        router.addService("/stats", new StatsController());
         return router;
     }
 }

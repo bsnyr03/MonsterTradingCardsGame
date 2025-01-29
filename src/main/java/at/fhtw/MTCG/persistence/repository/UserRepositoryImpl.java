@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class UserRepositoryImpl implements UserRepository {
     private UnitOfWork unitOfWork;
@@ -195,5 +196,48 @@ public class UserRepositoryImpl implements UserRepository {
             unitOfWork.rollbackTransaction();
             throw e;
         }
+    }
+    @Override
+    public User getUserStatsByToken(String token) throws SQLException {
+        String sql = "SELECT id, username, elo, wins, losses, draws, games_played, coins FROM users WHERE token = ?";
+        try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
+            statement.setString(1, token);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                return new User(
+                        resultSet.getInt("id"),
+                        resultSet.getString("username"),
+                        resultSet.getInt("elo"),
+                        resultSet.getInt("wins"),
+                        resultSet.getInt("losses"),
+                        resultSet.getInt("draws"),
+                        resultSet.getInt("games_played"),
+                        resultSet.getInt("coins")
+                );
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public List<User> getScoreboard() throws SQLException {
+        String sql = "SELECT username, elo, wins, losses, draws FROM users ORDER BY elo DESC";
+        List<User> users = new ArrayList<>();
+
+        try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                users.add(new User(
+                        resultSet.getString("username"),
+                        resultSet.getInt("elo"),
+                        resultSet.getInt("wins"),
+                        resultSet.getInt("losses"),
+                        resultSet.getInt("draws")
+                ));
+            }
+        }
+        return users;
     }
 }
