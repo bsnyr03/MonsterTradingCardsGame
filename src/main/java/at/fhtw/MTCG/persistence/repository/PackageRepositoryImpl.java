@@ -2,12 +2,10 @@ package at.fhtw.MTCG.persistence.repository;
 
 import at.fhtw.MTCG.model.Card;
 import at.fhtw.MTCG.model.Package;
-import at.fhtw.MTCG.model.enums.CardTypeEnum;
-import at.fhtw.MTCG.model.enums.ElementTypeEnum;
+
 import at.fhtw.MTCG.persistence.UnitOfWork;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.sql.PreparedStatement;
@@ -60,7 +58,7 @@ public class PackageRepositoryImpl implements PackageRepository {
 
             if (resultSet.next()) {
                 String cardsJson = resultSet.getString("cards");
-                return new ObjectMapper().readValue(cardsJson, new TypeReference<List<Card>>() {
+                return new ObjectMapper().readValue(cardsJson, new TypeReference<>() {
                 });
             }
         } catch (JsonProcessingException e) {

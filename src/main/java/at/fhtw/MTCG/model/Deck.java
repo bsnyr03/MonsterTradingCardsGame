@@ -50,20 +50,4 @@ public class Deck {
     public boolean isEmpty() {
         return this.cards.isEmpty();
     }
-
-    public Card drawRandomCard() {
-        if (this.cards.isEmpty()) {
-            throw new IllegalStateException("No cards left in the deck.");
-        }
-        Collections.shuffle(cards);
-        return this.cards.removeFirst();
-    }
-
-    public void returnCard(Card card) {
-        this.cards.add(card);
-    }
-
-    public void addCard(Card card) {
-        this.cards.add(card);
-    }
 }

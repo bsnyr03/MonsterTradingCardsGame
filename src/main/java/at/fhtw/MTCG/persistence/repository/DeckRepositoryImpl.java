@@ -52,7 +52,6 @@ public class DeckRepositoryImpl implements DeckRepository {
             if (resultSet.next()) {
                 String cardsJson = resultSet.getString("cards");
 
-                // Konvertiere JSON korrekt zu einer Liste von Karten
                 ObjectMapper objectMapper = new ObjectMapper();
                 List<Card> cards = objectMapper.readValue(
                         cardsJson,
@@ -66,7 +65,7 @@ public class DeckRepositoryImpl implements DeckRepository {
                 );
             }
 
-            return null; // Kein Deck gefunden
+            return null;
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Error reading cards from JSON", e);
         }

@@ -2,6 +2,7 @@ package at.fhtw.MTCG.model;
 
 import at.fhtw.MTCG.model.enums.CardTypeEnum;
 import at.fhtw.MTCG.model.enums.ElementTypeEnum;
+import at.fhtw.MTCG.model.enums.MonsterTypeEnum;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -11,15 +12,18 @@ public class Card {
     private double damage;
     private ElementTypeEnum element;
     private CardTypeEnum type;
+    private MonsterTypeEnum monsterType;
+
 
     public Card(){}
 
-    public Card(int id, String name, double damage, ElementTypeEnum element, CardTypeEnum type){
+    public Card(int id, String name, double damage, ElementTypeEnum element, CardTypeEnum type, MonsterTypeEnum monsterType){
         this.id = id;
         this.name = name;
         this.damage = damage;
         this.element = element;
         this.type = type;
+        this.monsterType = monsterType;
     }
 
     public int getId() {
@@ -112,4 +116,7 @@ public class Card {
         return false;
     }
 
+    public MonsterTypeEnum getMonsterType() {
+        return monsterType;
+    }
 }

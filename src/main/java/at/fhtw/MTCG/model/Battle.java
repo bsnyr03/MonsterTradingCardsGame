@@ -1,5 +1,7 @@
 package at.fhtw.MTCG.model;
 
+import at.fhtw.MTCG.model.enums.ElementTypeEnum;
+import at.fhtw.MTCG.model.enums.MonsterTypeEnum;
 import at.fhtw.MTCG.persistence.repository.*;
 import at.fhtw.MTCG.persistence.UnitOfWork;
 
@@ -30,7 +32,6 @@ public class Battle {
     public String startBattle() throws SQLException {
         int roundCount = 0;
         DeckRepository deckRepository = new DeckRepositoryImpl(new UnitOfWork());
-        UserRepository userRepository = new UserRepositoryImpl(new UnitOfWork());
 
         while (!player1Deck.getCards().isEmpty() && !player2Deck.getCards().isEmpty() && roundCount < MAX_ROUNDS) {
             roundCount++;
@@ -75,35 +76,34 @@ public class Battle {
     }
 
     private int fight(Card card1, Card card2) {
-        // Spezialfälle
-        if ("GOBLIN".equals(card1.getType()) && "DRAGON".equals(card2.getType())) {
+        if (card1.getMonsterType() == MonsterTypeEnum.GOBLIN && card2.getMonsterType() == MonsterTypeEnum.DRAGON) {
             return -1;
         }
-        if ("GOBLIN".equals(card2.getType()) && "DRAGON".equals(card1.getType())) {
+        if (card1.getMonsterType() == MonsterTypeEnum.DRAGON && card2.getMonsterType() == MonsterTypeEnum.GOBLIN) {
             return 1;
         }
-        if ("WIZARD".equals(card1.getType()) && "ORK".equals(card2.getType())) {
+        if (card1.getMonsterType() == MonsterTypeEnum.WIZARD && card2.getMonsterType() == MonsterTypeEnum.ORK) {
             return 1;
         }
-        if ("WIZARD".equals(card2.getType()) && "ORK".equals(card1.getType())) {
+        if (card1.getMonsterType() == MonsterTypeEnum.ORK && card2.getMonsterType() == MonsterTypeEnum.WIZARD) {
             return -1;
         }
-        if ("KNIGHT".equals(card1.getType()) && card2.isSpell() && "WATER".equals(card2.getElement())) {
+        if (card1.getMonsterType() == MonsterTypeEnum.KNIGHT && card2.isSpell() && card2.getElement() == ElementTypeEnum.WATER) {
             return -1;
         }
-        if ("KNIGHT".equals(card2.getType()) && card1.isSpell() && "WATER".equals(card1.getElement())) {
+        if (card2.getMonsterType() == MonsterTypeEnum.KNIGHT && card1.isSpell() && card1.getElement() == ElementTypeEnum.WATER) {
             return 1;
         }
-        if ("KRAKEN".equals(card1.getType()) && card2.isSpell()) {
+        if (card1.getMonsterType() == MonsterTypeEnum.KRAKEN && card2.isSpell()) {
             return 1;
         }
-        if ("KRAKEN".equals(card2.getType()) && card1.isSpell()) {
+        if (card2.getMonsterType() == MonsterTypeEnum.KRAKEN && card1.isSpell()) {
             return -1;
         }
-        if ("FIREELF".equals(card1.getType()) && "DRAGON".equals(card2.getType())) {
+        if (card1.getMonsterType() == MonsterTypeEnum.FIREELF && card2.getMonsterType() == MonsterTypeEnum.DRAGON) {
             return 1;
         }
-        if ("FIREELF".equals(card2.getType()) && "DRAGON".equals(card1.getType())) {
+        if (card2.getMonsterType() == MonsterTypeEnum.FIREELF && card1.getMonsterType() == MonsterTypeEnum.DRAGON) {
             return -1;
         }
 
@@ -111,14 +111,12 @@ public class Battle {
         double card2Damage = card2.getDamage();
 
         if (card1.isSpell() || card2.isSpell()) {
-            // Effektivität von card1 gegen card2
             if (card1.isEffectiveAgainst(card2)) {
                 card1Damage *= 2;
             } else if (card1.isIneffectiveAgainst(card2)) {
                 card1Damage /= 2;
             }
 
-            // Effektivität von card2 gegen card1
             if (card2.isEffectiveAgainst(card1)) {
                 card2Damage *= 2;
             } else if (card2.isIneffectiveAgainst(card1)) {
@@ -153,7 +151,6 @@ public class Battle {
             rewardWinnerWithCoins(player1Deck.getUserId());
         }
 
-        // Update ELO and games played
         userRepository.updateELOAndGamesPlayed(player1Deck.getUserId(), player1ELOChange);
         userRepository.updateELOAndGamesPlayed(player2Deck.getUserId(), player2ELOChange);
         userRepository.updateWinLossRecord(player1Deck.getUserId(), player1Won, draw);
