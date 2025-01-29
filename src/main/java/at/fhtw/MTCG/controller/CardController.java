@@ -75,7 +75,6 @@ public class CardController implements RestController {
             return new Response(HttpStatus.UNAUTHORIZED, ContentType.JSON, "{\"error\": \"Invalid user token\"}");
         }
 
-        // Falls die Route "/cards/assign" ist
         if (request.getPathParts().size() > 1 && "assign".equals(request.getPathParts().get(1))) {
             Card card = new ObjectMapper().readValue(request.getBody(), Card.class);
             if (cardService.assignCardToUser(String.valueOf(card.getId()), token)) {
@@ -85,7 +84,6 @@ public class CardController implements RestController {
             }
         }
 
-        // Falls eine neue Karte erstellt werden soll
         Card card = new ObjectMapper().readValue(request.getBody(), Card.class);
         if (cardService.createCard(card)) {
             return new Response(HttpStatus.CREATED, ContentType.JSON, "{\"message\": \"Card created successfully\"}");

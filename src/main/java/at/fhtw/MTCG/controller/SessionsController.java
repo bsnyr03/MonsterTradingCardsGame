@@ -35,7 +35,6 @@ public class SessionsController implements RestController {
 
     private Response handleLogin(Request request) {
         try {
-            // Lese die JSON-Daten aus der Anfrage
             Map<String, String> requestBody = new ObjectMapper().readValue(request.getBody(), Map.class);
             String username = requestBody.get("username");
             String password = requestBody.get("password");
@@ -48,10 +47,8 @@ public class SessionsController implements RestController {
                 );
             }
 
-            // Versuche, den Benutzer einzuloggen
             String token = userService.loginUser(username, password);
 
-            // Erfolgreicher Login
             String jsonResponse = new ObjectMapper().writeValueAsString(Map.of(
                     "message", "Login successful",
                     "username", username,
