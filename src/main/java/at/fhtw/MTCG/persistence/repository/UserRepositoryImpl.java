@@ -81,11 +81,6 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public void deleteUser(User user) {
-        // Noch nicht implementiert
-    }
-
-    @Override
     public User findByToken(String token) throws SQLException {
         String sql = "SELECT * FROM users WHERE token = ?";
         try (PreparedStatement statement = unitOfWork.prepareStatement(sql)) {
@@ -122,6 +117,22 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public void updateCoins(int userId, int coins) throws SQLException {
         String sql = "UPDATE users SET coins = ? WHERE id = ?";
+        try {
+            try (PreparedStatement statement = this.unitOfWork.prepareStatement(sql)) {
+                statement.setInt(1, coins);
+                statement.setInt(2, userId);
+                statement.executeUpdate();
+                unitOfWork.commitTransaction();
+            }
+        } catch (SQLException e) {
+            unitOfWork.rollbackTransaction();
+            throw e;
+        }
+    }
+
+    @Override
+    public void updateCoinsForExtraPrice(int userId, int coins) throws SQLException {
+        String sql = "UPDATE users SET coins = coins + ? WHERE id = ?";
         try {
             try (PreparedStatement statement = this.unitOfWork.prepareStatement(sql)) {
                 statement.setInt(1, coins);
