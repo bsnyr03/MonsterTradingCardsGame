@@ -10,6 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Battle {
+    private final DeckRepository deckRepository;
+    private final CardRepository cardRepository;
+    private final UserRepository userRepository;
+    private final UnitOfWork unitOfWork;
     private final Deck player1Deck;
     private final Deck player2Deck;
     private final List<String> battleLog;
@@ -17,7 +21,10 @@ public class Battle {
     private static final int WINNER_BONUS_COINS = 10;
 
     public Battle(int player1Id, int player2Id) throws Exception {
-        DeckRepository deckRepository = new DeckRepositoryImpl(new UnitOfWork());
+        this.unitOfWork = new UnitOfWork();
+        this.deckRepository = new DeckRepositoryImpl(unitOfWork);
+        this.cardRepository = new CardRepositoryImpl(unitOfWork);
+        this.userRepository = new UserRepositoryImpl(unitOfWork);
 
         this.player1Deck = deckRepository.getDeckByUserId(player1Id);
         this.player2Deck = deckRepository.getDeckByUserId(player2Id);
@@ -31,7 +38,6 @@ public class Battle {
 
     public String startBattle() throws SQLException {
         int roundCount = 0;
-        DeckRepository deckRepository = new DeckRepositoryImpl(new UnitOfWork());
 
         while (!player1Deck.getCards().isEmpty() && !player2Deck.getCards().isEmpty() && roundCount < MAX_ROUNDS) {
             roundCount++;
@@ -133,8 +139,6 @@ public class Battle {
         boolean draw = false;
         boolean player1Won = false;
 
-        UserRepository userRepository = new UserRepositoryImpl(new UnitOfWork());
-
         if (player1Deck.getCards().isEmpty() && player2Deck.getCards().isEmpty()) {
             winner = "The battle ended in a draw after " + rounds + " rounds.";
             draw = true;
@@ -159,7 +163,6 @@ public class Battle {
     }
 
     private void rewardWinnerWithCoins(int userId) throws SQLException {
-        UserRepository userRepository = new UserRepositoryImpl(new UnitOfWork());
         userRepository.updateCoinsForExtraPrice(userId, Battle.WINNER_BONUS_COINS);
         battleLog.add("Winner awarded with " + Battle.WINNER_BONUS_COINS + " bonus coins!");
     }
@@ -169,7 +172,6 @@ public class Battle {
     }
 
     private void updateCardOwnership(int cardId, int newUserId) throws SQLException {
-        CardRepository cardRepository = new CardRepositoryImpl(new UnitOfWork());
         boolean updated = cardRepository.updateCardUser(cardId, newUserId);
         if (!updated) {
             battleLog.add("Error: Failed to update ownership of card with ID " + cardId);
