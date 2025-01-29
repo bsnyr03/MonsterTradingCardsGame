@@ -57,6 +57,11 @@ public class Battle {
             } else {
                 battleLog.add("This round is a draw.");
             }
+
+            DeckRepository deckRepository = new DeckRepositoryImpl(new UnitOfWork());
+            deckRepository.updateDeck(player1Deck.getUserId(), player1Deck);
+            deckRepository.updateDeck(player2Deck.getUserId(), player2Deck);
+
         }
         return concludeBattle(roundCount);
     }
@@ -120,7 +125,6 @@ public class Battle {
                 card2Damage /= 2;
             }
         }
-
         return Double.compare(card1Damage, card2Damage);
     }
 
