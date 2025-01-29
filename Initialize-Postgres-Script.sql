@@ -5,7 +5,7 @@ create
 database mtcg with owner baris;
 
 
--- Als MTCG db user:
+/* Create Table users */
 CREATE TABLE users
 (
     id       SERIAL PRIMARY KEY,
@@ -14,14 +14,13 @@ CREATE TABLE users
     token    VARCHAR(255) UNIQUE
 );
 
+/* Add some test users */
 INSERT INTO users (username, password)
 VALUES ('testuser', 'testpassword');
 INSERT INTO users (username, password)
 VALUES ('testuser2', '1234');
-INSERT INTO users (username, password)
-VALUES ('testuser3', 'abcd');
 
-
+/* Create Table cards */
 CREATE TABLE cards
 (
     id      VARCHAR(36) PRIMARY KEY,
@@ -31,9 +30,11 @@ CREATE TABLE cards
     type    VARCHAR(50)      NOT NULL
 );
 
+/* Add some test cards */
 INSERT INTO cards (name, damage, element, type) VALUES ('FireGoblin', '50', 'FIRE', 'MONSTER');
 INSERT INTO cards (name, damage, element, type) VALUES ('WaterSpell', '40', 'WATER', 'SPELL');
 
+/* Create Table packages */
 CREATE TABLE packages (
                           id SERIAL PRIMARY KEY,
                           name VARCHAR(100) NOT NULL,
@@ -41,47 +42,52 @@ CREATE TABLE packages (
                           cards JSONB NOT NULL
 );
 
+/* Add foreign key to packages table */
 ALTER TABLE packages ADD COLUMN user_id INTEGER REFERENCES users(id);
 
+/* Add coins to users */
 ALTER TABLE users ADD COLUMN coins INTEGER DEFAULT 20 NOT NULL;
 
+/* Add elo to users */
 ALTER TABLE users ADD COLUMN elo INTEGER DEFAULT 1000;
+
+/* Add games played to users */
 ALTER TABLE users ADD COLUMN games_played INTEGER DEFAULT 0;
 
+/* Create Table decks */
 CREATE TABLE decks (
                        id SERIAL PRIMARY KEY,
                        user_id INTEGER NOT NULL REFERENCES users(id),
                        cards JSONB NOT NULL
 );
 
-
-/* Tabellen leeren */
+/* Empty Tabels */
 DELETE FROM users;
 DELETE FROM cards;
 DELETE FROM packages;
 DELETE FROM decks;
 
-/* Tabellen zurücksetzen */
+/* Reset Tabels */
 TRUNCATE TABLE users RESTART IDENTITY;
 TRUNCATE TABLE cards RESTART IDENTITY;
 TRUNCATE TABLE packages RESTART IDENTITY;
 TRUNCATE TABLE decks RESTART IDENTITY;
 
-/* Sequenzen zurücksetzen */
+/* Reset Sequenzes */
 ALTER SEQUENCE cards_id_seq RESTART WITH 1;
 ALTER SEQUENCE packages_id_seq RESTART WITH 1;
 ALTER SEQUENCE decks_id_seq RESTART WITH 1;
 ALTER SEQUENCE users_id_seq RESTART WITH 1;
 
-/* Coins zurücksetzen */
+/* Reset Coins */
 UPDATE users
 SET coins = 20;
 
-/* ELO zurücksetzen */
+/* Reset ELO */
 UPDATE users
 SET elo = 1000;
 
-/* Games Played zurücksetzen */
+/* Reset games played */
 UPDATE users
 SET games_played = 0;
 
@@ -90,3 +96,8 @@ SELECT * FROM users;
 SELECT * FROM cards;
 SELECT * FROM packages;
 SELECT * FROM decks;
+
+/* Add wins, losses, draws */
+ALTER TABLE users ADD COLUMN wins INTEGER DEFAULT 0;
+ALTER TABLE users ADD COLUMN losses INTEGER DEFAULT 0;
+ALTER TABLE users ADD COLUMN draws INTEGER DEFAULT 0;
