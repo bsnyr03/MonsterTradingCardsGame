@@ -10,9 +10,13 @@ import at.fhtw.httpserver.server.Response;
 import at.fhtw.httpserver.server.RestController;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jetbrains.annotations.NotNull;
 
+import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ScoreboardController implements RestController {
     private final UserService userService;
@@ -36,7 +40,18 @@ public class ScoreboardController implements RestController {
 
     private Response getScoreboard() throws SQLException, JsonProcessingException {
         List<User> users = userService.getScoreboard();
-        String jsonResponse = new ObjectMapper().writeValueAsString(users);
+
+        @NotNull List<Map<@NotNull String, ? extends Serializable>> formattedUsers = users.stream()
+                .map(user -> Map.of(
+                        "username", user.getUsername(),
+                        "elo", user.getElo(),
+                        "wins", user.getGamesWon(),
+                        "losses", user.getGamesLost(),
+                        "draws", user.getGamesDrawn()
+                ))
+                .collect(Collectors.toList());
+
+        String jsonResponse = new ObjectMapper().writeValueAsString(formattedUsers);
         return new Response(HttpStatus.OK, ContentType.JSON, jsonResponse);
     }
 }

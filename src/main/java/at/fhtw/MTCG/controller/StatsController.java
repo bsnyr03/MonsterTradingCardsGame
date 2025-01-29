@@ -12,6 +12,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.sql.SQLException;
+import java.util.Map;
 
 public class StatsController implements RestController {
     private final UserService userService;
@@ -36,11 +37,22 @@ public class StatsController implements RestController {
     private Response getUserStats(Request request) throws SQLException, JsonProcessingException {
         String token = request.getHeader("Authorization").replace("Bearer ", "");
         User user = userService.getUserStatsByToken(token);
+
         if (user == null) {
             return new Response(HttpStatus.NOT_FOUND, ContentType.JSON, "{\"error\": \"User not found\"}");
         }
 
-        String jsonResponse = new ObjectMapper().writeValueAsString(user);
+        Map<String, Object> userStats = Map.of(
+                "username", user.getUsername(),
+                "elo", user.getElo(),
+                "wins", user.getGamesWon(),
+                "losses", user.getGamesLost(),
+                "draws", user.getGamesDrawn(),
+                "games_played", user.getGamesPlayed(),
+                "coins", user.getCoins()
+        );
+
+        String jsonResponse = new ObjectMapper().writeValueAsString(userStats);
         return new Response(HttpStatus.OK, ContentType.JSON, jsonResponse);
     }
 }
