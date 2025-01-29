@@ -92,6 +92,18 @@ SET elo = 1000;
 UPDATE users
 SET games_played = 0;
 
+/* Reset wins */
+UPDATE users
+SET wins = 0;
+
+/* Reset losses */
+UPDATE users
+SET losses = 0;
+
+/* Reset draws */
+UPDATE users
+SET draws = 0;
+
 /* Testing */
 SELECT * FROM users;
 SELECT * FROM cards;
